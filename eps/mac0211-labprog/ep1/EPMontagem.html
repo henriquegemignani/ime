@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html><head>
+
+
+
+    
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    
+  <meta name="GENERATOR" content="Mozilla/4.75 [en] (X11; U; SunOS 5.7 sun4u) [Netscape]">
+  <title>MAC 211 - 1S 2010 -- EP1</title>
+</head><body alink="#ff0000" bgcolor="#ffcc99" link="#0000ee" text="#000000" vlink="#551a8b">
+  
+<center> 
+<h1> MAC 211 - Laborat&oacute;rio de Programa&ccedil;&atilde;o </h1>
+</center>
+  
+<center> 
+<h2> Exerc&iacute;cio-Programa 1: Linguagem de Montagem</h2>
+</center>
+  
+<ul>
+ <li> Este &eacute; um exerc&iacute;cio-programa que tem como
+objetivo praticar os conceitos b&aacute;sicos de linguagem de montagem e
+fazer com que voc&ecirc; implemente um programa com uma parte em C e uma
+parte em linguagem de montagem.</li>
+
+<br> 
+
+ <li> A parte em linguagem de montagem consiste na implementa&ccedil;&atilde;o
+de uma fun&ccedil;&atilde;o que recebe como par&acirc;metros dois inteiros n&atilde;o-negativos de 16 bits (digamos 
+<tt>p</tt> e <tt>r</tt>) e duas cadeias de caracteres: o nome de um arquivo de leitura e o nome de um arquivo 
+para escrita. O arquivo de leitura cont&eacute;m apenas n&uacute;meros inteiros n&atilde;o-negativos de 16 
+bits, separados entre si por espa&ccedil;os. A fun&ccedil;&atilde;o dever&aacute; escrever no arquivo de 
+sa&iacute;da todos os n&uacute;meros primos do primeiro arquivo que se encontram entre <tt>p</tt> e 
+<tt>r</tt> (estes inclusive) e devolver o n&uacute;mero de n&uacute;meros primos escritos no arquivo de 
+sa&iacute;da.
+
+  </li>
+
+<br>
+
+ <li> Em um programa em C, o prot&oacute;tipo desta fun&ccedil;&atilde;o
+ser&aacute; declarado como:</li>
+
+  <br><br>
+
+  <center> <tt>int filtra_os_primos (unsigned short int p, unsigned short int r, char * nome_arquivo_entrada, 
+char * nome_arquivo_saida);</tt> </center>
+
+  <br>
+
+  Onde:
+
+  <ul>	
+
+  <li> <tt>p</tt> e <tt>r</tt> s&atilde;o dois n&uacute;meros inteiros n&atilde;o-negativos de 16 bits;</li>
+  <li> <tt>nome_arquivo_entrada</tt> &eacute; o nome do arquivo que cont&eacute;m os inteiros a serem 
+verificados;</li>
+  <li> <tt>nome_arquivo_saida</tt> &eacute; o nome do arquivo onde ser&atilde;o armazenados os n&uacute;meros 
+primos.</li>
+  
+  </ul>
+
+<br>
+
+  <li> A parte em linguagem C consiste na implementa&ccedil;&atilde;o de
+um programa que ler&aacute; os dados de entrada da entrada padr&atilde;o
+(teclado ou arquivo redirecionado), chamar&aacute; a fun&ccedil;&atilde;o em linguagem
+de montagem e imprimir&aacute; o resultado na sa&iacute;da padr&atilde;o. Por exemplo,
+se a entrada padr&atilde;o receber os seguintes par&acirc;metros:
+   </li>
+
+<br>
+
+<center><tt>3 10 arquivoLeitura.txt arquivoEscrita.txt</tt></center>
+
+<br>E se <tt>arquivoLeitura.txt</tt> contiver os seguintes inteiros:
+   
+<center><tt>100 20 3 10 3 7 12 17 33 3 5</tt></center><br>
+
+<br>O programa precisa imprimir na sa&iacute;da padr&atilde;o:<br><br>
+
+<center><tt>5 primo(s) encontrado(s).</tt></center>
+
+<br>E o arquivo <tt>arquivoEscrita.txt</tt> dever&aacute; conter os n&uacute;meros:
+   
+<center><tt>3 3 7 3 5</tt></center><br>
+   
+ 
+</ul>
+
+<h3>Observa&ccedil;&otilde;es importantes</h3>
+
+<ul>
+
+ <li>O EP dever&aacute; ser implementado utilizando a nota&ccedil;&atilde;o Intel e dever&aacute; ser 
+compat&iacute;vel com o NASM do Linux.
+ </li>
+
+ <p></p>
+ <li>Na parte em linguagem de montagem, &eacute; recomendado criar subrotinas para cada tarefa (uma para ler um inteiro do arquivo, outra para escrever um inteiro no arquivo de sa&iacute;da, outra para verificar se um n&uacute;mero &eacute; primo, etc.). 
+ 
+ <p></p>
+ <li>O EP deve ser realizado em duplas (em casos excepcionais, trabalhos
+ individuais ser&atilde;o aceitos). Cada componente da dupla deve
+ obrigatoriamente participar de todas as etapas
+da solu&ccedil;&atilde;o do exerc&iacute;cio. Os alunos que fizerem em duplas devem trabalhar lado a lado no mesmo 
+computador; trata-se de uma das recomenda&ccedil;&otilde;es de uma metodologia de programa&ccedil;&atilde;o, chamada
+programa&ccedil;&atilde;o em pares (<em>pair programming</em>).</li>
+
+  <p> </p>
+<li><em>Obrigat&oacute;rio:</em> Para produzir os arquivos de entrada, escreva um programa em linguagem C que crie um arquivo contendo <tt>n</tt> inteiros n&atilde;o-negativos de 16 bits, escolhidos de forma aleat&oacute;ria, separados por espa&ccedil;os (<tt>n</tt> e o nome do arquivo podem ser passados como argumentos na chamada do programa). A entrega deste programa &eacute; obrigat&oacute;ria.
+</li>
+
+  <p> </p>
+<li><em>Obrigat&oacute;rio:</em> Utilizando o programa de produ&ccedil;&atilde;o de inst&acirc;ncias aleat&oacute;rias, teste o desempenho de seu EP para entradas de tamanho 10, 10^2, 10^3 e 
+10^4. Para isso, utilize o comando <tt>time</tt> do <em>shell</em> do
+Linux. Para cada tamanho de inst&acirc;ncia, o programa deve ser executado 10
+vezes. Um arquivo LEIAME deve ser entregue, contendo os a m&eacute;dia e o desvio
+padr&atilde;o dos tempos de execu&ccedil;&atilde;o das 10 execu&ccedil;&otilde;es para cada tamanho da entrada.
+</li>
+
+  <p> </p>
+<li><em>Opcional:</em> (vale 1 pontinho extra) Escreva tamb&eacute;m a mesma fun&ccedil;&atilde;o da parte de linguagem de montagem em
+linguagem C e compare o desempenho das duas implementa&ccedil;&otilde;es da fun&ccedil;&atilde;o para
+entradas de tamanho 10, 10^2, 10^3, 10^4, 10^5 e 10^6. A sa&iacute;da do programa deve ser uma tabela bem formatada e leg&iacute;vel apresentando os dados obtidos. Escreva em um arquivo LEIAME2 as conclus&otilde;es para a poss&iacute;vel diferen&ccedil;a de desempenho entre as duas vers&otilde;es.
+  
+  <p> </p>
+  </li><li><i>DATA&nbsp;DE&nbsp;ENTREGA: 6 de abril</i></li>
+
+
+</ul>
+
+<h3>Dicas</h3>
+
+<ul>
+
+<li> Dois exemplos de leitura/escrita em linguagem de montagem: o programa <a href="montagem/criacaoEscrita.asm">criacaoEscrita.asm</a>, que cria um arquivo de testes e escreve um texto nele, 
+e o programa <a href="montagem/leitura.asm">leitura.asm</a>, que faz duas leituras do arquivo criado pelo programa anterior.</li>
+
+<p></p>
+
+<li> Para criar um execut&aacute;vel para testes, crie o objeto da sua parte de montagem utilizando o NASM, o objeto da parte em C utilizando o <tt>gcc</tt> (op&ccedil;&atilde;o <tt>-c</tt>) 
+e ligue os dois utilizando tamb&eacute;m o <tt>gcc</tt>.</li>
+
+<p></p>
+
+<li> Sempre utilize no <tt>gcc</tt> os par&acirc;metros <tt>-ansi -pedantic -Wall</tt>.</li>
+
+</ul>
+
+<p><br>
+ </p>
+<hr><a href="http://www.ime.usp.br/%7Ekon/MAC211">P&aacute;gina de MAC211</a>
+<br>
+ <a href="http://www.ime.usp.br/%7Ekon">P&aacute;gina do Fabio</a>
+<br>
+ <a href="http://www.ime.usp.br/dcc">P&aacute;gina do DCC</a>
+ 
+</body></html>

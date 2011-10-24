@@ -1,0 +1,31 @@
+function f(x)
+    devolva x;
+
+a <- 10;
+b <- 20 - a;
+c <- f(b);
+a <- 20;
+d <- f(b);
+devolva c+d;
+
+
+O problema da existência de variáveis em uma linguagem com 
+avaliação preguiçosa é simples: a ordem de execução dos 
+comandos do algoritmo não é garantida. O algoritmo pode 
+funcionar de modos não previstos.
+
+Numa avaliação ávida, o algoritmo acima é simples: a recebe 
+10, b recebe 20-10=10, c recebe 10, a passa a valer 20, 
+d recebe 10 = 0 e é retornado 10+10=20.
+
+Com avaliação preguiçosa, porém, b, c e d só seriam calculados 
+quando seu valor for necessário, ou seja, apenas quando 
+precisarmos devolver b e c+d, ou seja, teremos a ordem seguinte:
+a recebe 10, b "vale" 20-a e será calculado quando necessário, 
+c "vale" f(b) e será calculado quando necessário, a passa a valer 
+20, d "vale" f(b) e será calculado quando necessário, devolva c+d. 
+c vale f(20-20)=0 e d vale f(20-20)=0, logo devolva 0+0 = 0.
+
+Isso obviamente não é o esperado dada a ordem dos comandos. 
+Variáveis e boxes, portanto, não existem para garantir a execução 
+dos comandos na ordem pretendida pelo programador.

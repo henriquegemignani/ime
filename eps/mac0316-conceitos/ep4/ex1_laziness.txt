@@ -1,0 +1,9 @@
+Java possui avaliação ávida.
+Isso é provado pelo fato do programa exemplo parar com 
+um erro, sendo que a variável passada para a chamada de 
+função nunca é usada.
+Apenas com a avaliação ávida isso aconteceria: numa 
+avaliação preguiçosa, seu valor seria irrelevante, 
+o que não geraria o erro.
+Enquanto isso, numa avaliação ávida, a variável é 
+calculada imediatamente, o que causa o erro.

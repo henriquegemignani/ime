@@ -1,0 +1,26 @@
+Porque o CPS elimina a necessidade da existência de uma pilha. 
+Consideremos uma função e sua transformação para CPS.
+Uma função transformada para CPS possui os argumentos da função 
+original, um argumento "continuação" que recebe o resultado 
+da computação da função original e e não retorna valores. As 
+subrotinas usadas dentro de um algoritmo em CPS que retornam 
+valores (e portanto não estão em CPS)tem seus valores de retorno 
+usadas por uma função k, que é dada pela função que chama a 
+subrotina.
+
+Sendo assim, calculamos uma função e usamos seu resultado 
+para os calculos das próximas funções, passando o resultado 
+como uma continuação, e as próximos funções estando explicitadas 
+no valor da continuação. Sendo assim, não é necessário empilhar 
+funções a serem calculadas pois todas as funções que serão 
+calculadas já possuem todos os argumentos necessários para seu 
+cálculo, sem a necessidade de outras chamadas de funções. Ou 
+seja, garantimos que todas as funções irão depender de valores 
+já calculados, o que elimina a necessidade da pilha.
+
+Um possível ponto negativo é a existência de informações 
+redundantes sendo guardadas na memória, ou seja, valores que 
+já foram usados e não serão mais, mas que ainda assim continuarão 
+existindo até o término de execução da função. Um modo de prevenir 
+isso é usar o CPS apenas quando seu uso for benéfico em termos de 
+memória/velocidade de execução, tais como em recursões de cauda.
