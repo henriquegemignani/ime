@@ -1,0 +1,624 @@
+% tradução de títulos como `References'
+% `traduz' os acentos do portug
+%% Parágrafo
+%% Empurra para cá empurra para lá
+
+
+\documentclass[12pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage[brazil]{babel}
+\usepackage[latin1]{inputenc}
+
+%TCIDATA{OutputFilter=Latex.dll}
+%TCIDATA{Version=5.00.0.2552}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{Created=Mon Nov 06 10:17:52 2000}
+%TCIDATA{LastRevised=Saturday, March 24, 2012 22:03:15}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+
+\setlength{\textwidth}{17cm}
+\setlength{\textheight}{23cm}
+\setlength{\parindent}{5mm}
+\setlength{\parskip}{1mm}
+\evensidemargin -0.3cm
+\oddsidemargin -0.3cm
+\topmargin -0.7in
+\newcommand{\legal}{${\cal L}g \; $}
+\input{tcilatex}
+
+\begin{document}
+
+
+% ç
+% ao
+% cao
+% coes
+% a'
+% e' 
+% i'
+% o'
+% u'
+% `a
+% ^a
+% ^e
+
+\noindent {\footnotesize \textsc{DCC--IME--USP}} \hfill {\footnotesize 
+\textsc{Routo Terada}}
+
+\vspace{-1mm} \hfill {\footnotesize \textsc{Sala 204C Tel.: 3091 5918}}
+
+\vspace{-1mm} \hfill {\footnotesize \textsc{e-mail} rt@ime.usp.br}
+
+\vspace{1cm}
+
+\begin{center}
+{\large MAC 5723 - 336 - Criptografia}
+
+\textsc{Primeiro Semestre de 2012}
+\end{center}
+
+\noindent Exercício-Programa\hfill Data de entrega: veja no sistema PACA
+
+\noindent \textbf{Observações}
+
+\begin{itemize}
+\item Este exercício é para ser feito \emph{individualmente}.
+
+\item Entregue no sistema PACA UM ÚNICO arquivo contendo os arquivos
+seguintes, eventualmente comprimidos:
+
+\begin{itemize}
+\item um arquivo chamado LEIA.ME (em formato .txt) com:
+
+\begin{itemize}
+\item seu nome completo, e número USP,
+
+\item os nomes dos arquivos inclusos com uma breve descrição de cada arquivo,
+
+\item uma descrição sucinta de \emph{como usar} o programa executável,
+necessariamente na linha-de-comando, i.e., SEM interface gráfica,
+
+\item qual computador (Intel, SUN, ou outro) e qual compilador C (gcc,
+TURBO-C, ou outro) e qual sistema operacional (LINUX, UNIX, MS-DOS, ou
+outro) foi usado,
+
+\item instruções de como compilar o(s) arquivo(s) fonte(s).
+\end{itemize}
+
+\item o arquivo MAKE, se for o caso.
+
+\item os arquivos do programa-fonte necessariamente em \emph{linguagem ANSI-C%
+},
+
+\item o programa \emph{compilado}, i.e., {\huge incluir o código executável} 
+{\huge (se não incluir, a nota será zero!)}
+
+\item se for o caso, alguns arquivos de entrada e saída usados nos testes:
+arquivos com os dados de \emph{entrada} chamados ENT1, ENT2, etc., e
+arquivos com os dados de \emph{saída} correspondentes, chamados SAI1, SAI2,
+etc.
+\end{itemize}
+
+\item Coloque comentários em seu programa explicando o que cada etapa do
+programa significa! Isso será levado em conta na sua nota.
+
+\item Faça uma saída clara! Isso será levado em conta na sua nota.
+
+\item Não deixe para a última hora. Planeje investir 70 porcento do tempo
+total de dedicação em escrever o seu programa todo e simular o programa SEM
+computador (eliminando erros de lógica) ANTES de digitar e compilar no
+computador. Isso economiza muito tempo e energia.
+
+\item A nota será \textbf{diminuída} de um ponto a cada dia ``corrido''\ de
+atraso na entrega.
+\end{itemize}
+
+\section{Programa de criptografia K128}
+
+Este exercício consiste em elaborar um programa para criptografar e
+decriptografar arquivos de qualquer comprimento, com o Algoritmo K128
+descrito a seguir. A chave principal $K$ de $128$ bits é derivada de uma
+senha, como descrito abaixo.
+
+O seu programa deve ser executado na linha de comando, com parâmetros
+relevantes, em um dos seguintes modos: (se houver a opção -a após a senha, o
+programa deve gravar brancos no lugar do arquivo de entrada e deletá-lo, o 
+\textsl{default} é não efetuar o apagamento)
+
+\begin{itemize}
+\item Modo (1) Para criptografar um arquivo: \newline
+programa -c -i \TEXTsymbol{<}arquivo de entrada\TEXTsymbol{>} -o \TEXTsymbol{%
+<}arquivo de saída\TEXTsymbol{>} -p \TEXTsymbol{<}senha\TEXTsymbol{>} -a
+
+\item Modo (2) Para decriptografar arquivos:\newline
+programa -d -i \TEXTsymbol{<}arquivo de entrada\TEXTsymbol{>} -o \TEXTsymbol{%
+<}arquivo de saída\TEXTsymbol{>} -p \TEXTsymbol{<}senha\TEXTsymbol{>}
+
+\item Modo (3) Para calcular aleatoriedade pelo método 1 (ver Item 1 abaixo):%
+\newline
+programa -1 -i \TEXTsymbol{<}arquivo de entrada\TEXTsymbol{>} -p \TEXTsymbol{%
+<}senha\TEXTsymbol{>}
+
+\item Modo (4) Para calcular aleatoriedade pelo método 2 (ver Item 2 abaixo):%
+\newline
+programa -2 -i \TEXTsymbol{<}arquivo de entrada\TEXTsymbol{>} -p \TEXTsymbol{%
+<}senha\TEXTsymbol{>}
+\end{itemize}
+
+A sintaxe dos parâmetros de \textquotedblleft features\textquotedblright\
+que não fazem parte da especificação (como a criptografia da senha no início
+do arquivo, se for o caso) fica à escolha de cada aluno. \medskip
+
+\noindent \textbf{A senha a ser digitada}: a senha $A$ no parâmetro -p 
+\TEXTsymbol{<}senha\TEXTsymbol{>} deve conter pelo menos \textbf{8}
+caracteres, sendo $A$ com \textbf{pelo menos} 2 letras e 2 algarismos
+decimais;
+
+\noindent \textbf{Geração da chave K de 128 bits a partir da senha: }se a
+senha $A$ digitada possuir menos que 16 caracteres (i.e., 16 bytes), a chave 
+$K$ de $128$ bits deve ser derivada de $A$ concatenando-se $A$ com ela pró%
+pria até completar 16 bytes ($128$ bits).
+
+\noindent \textbf{Leitura e gravação de arquivo}: O seu programa deve ler do
+disco o arquivo de entrada Entra, e deve gravar o arquivo de saída Sai
+correspondente a Entra criptografado ou decriptografado com a senha $A$, no
+modo CBC (Cipher Block Chaining), que consiste em encadear um bloco de $128$
+bits com o bloco anterior critografado da maneira vista em aula, e também
+descrito no livro Segurança de Dados.
+
+\begin{enumerate}
+\item No modo CBC, utilizar bits iguais a UM como Valor Inicial - VI.
+
+\item Você deve testar o programa com pelo menos dois arquivos Entra. Por
+exemplo, o seu próprio programa-fonte. Teste não só com arquivos-texto como
+com arquivos binários; por exemplo, com algum código executável, ou alguma mú%
+sica MP3.
+
+\item Se o último bloco a ser criptografado não possuir comprimento igual a $%
+64$ bits, completá-lo com bits iguais a UM.
+
+\item Verifique se o arquivo decriptografado Sai possui o mesmo comprimento
+que o arquivo original Entra. Algum bloco criptografado de Sai deve conter o
+comprimento do arquivo original Entra. Mas tome CUIDADO para o local deste
+bloco \ não prejudicar o tempo total de execução do seu programa.\medskip 
+\end{enumerate}
+
+\noindent O seu programa deve também efetuar os itens seguintes:\medskip 
+
+\noindent {\Large Item 1}: Medir a aleatoriedade do K128 da seguinte maneira.
+
+\noindent Seja $VetEntra$ um vetor lido de um arquivo de entrada para a memó%
+ria principal com exatamente $1024$ bits (i.e., $8$ blocos de $128$ bits, de
+modo que 
+\[
+VetEntra=Bl(1)||Bl(2)||Bl(3)||Bl(4)||...,
+\]%
+sendo cada bloco $Bl()$ de $128$ bits e $|VetEntra|=8\ast 128=\allowbreak
+1024$). \textbf{Ignorar} os bits restantes do arquivo, considerar apenas os $%
+1024$ bits iniciais. Veja ilustração a seguir: 
+\[
+\begin{tabular}{llllll}
+Número do bloco $k$ & $1$ & $2$ & $3$ & $4$ & $...$ \\ 
+Valores de $j$, posição de bit & $j=1,2,...128$ & $j=129,...,256$ & $%
+j=257,...,384$ & $j=385,...,512$ & $...$ \\ 
+$VetEntra$ & $Bl(1)$ & $Bl(2)$ & $Bl(3)$ & $Bl(4)$ & $...$ \\ 
+$VetEntraC$ (criptografado) & $BlC(1)$ & $BlC(2)$ & $BlC(3)$ & $BlC(4)$ & $%
+...$ \\ 
+$H(VetEntra,VetAlter)=1$ &  &  &  &  & $...$ \\ 
+$VetAlter$ & $BlAlter(1)$ & $BlAlter(2)$ & $BlAlter(3)$ & $BlAlter(4)$ & $...
+$ \\ 
+$VetAlterC$ (criptografado) & $BlAlterC(1)$ & $BlAlterC(2)$ & $BlAlterC(3)$
+& $BlAlterC(4)$ & $...$ \\ 
+Valores $j$ que afetam $H(k)$ & $j=1,2,...128$ & $j=1,2,...256$ & $%
+j=1,2,...384$ & $j=1,2,...512$ & $...$ \\ 
+Dist $H(BlC,BlAlterC)$ & $H(1),64$ vals. & $H(2),128$ vals. & $H(3),192$,
+vals & $H(4),256$ vals. & $...$ \\ 
+Soma acumulada de $H(k)$ & $SomaH(1)$ & $SomaH(2)$ & $SomaH(3)$ & $SomaH(4)$
+& $...$%
+\end{tabular}%
+\ \ 
+\]
+
+\noindent Para $j=1,2,...,|VetEntra|$, fazer o seguinte:
+
+\begin{enumerate}
+\item alterar apenas na memória só o $j$-ésimo bit do vetor $VetEntra$ de
+cada vez, obtendo um \textbf{outro vetor} na memória principal chamado $%
+VetAlter$, para $j=1,2,3,...$ tal que $|VetEntra|=|VetAlter|$; isto é, $%
+VetEntra$ e $VetAlter$ só diferem no $j$-ésimo bit, mas são de igual
+comprimento. Esse ÚNICO $j$-ésimo bit pode ser do primeiro bloco $BlAlter(1)$%
+, ou do segundo $BlAlter(2)$, ou de qualquer outro bloco. No caso de apenas $%
+8$ blocos, $j=1,2,3,...1024$. Por exemplo, no caso de $j=2$, $%
+Bl(1)=(0234567812345678)_{16}$, $Bl(2)=(1234567812345678)_{16},...$ e 
+\[
+VetAlter=BlAlter(1)||BlAlter(2)||...=4234567812345678||1234567812345678||...
+\]%
+ou seja diferem só no bit na posição $2$.
+
+\item seja $VetEntraC=BlC(1)||BlC(2)||BlC(3)||BlC(4)||...$ o vetor $VetEntra$
+criptografado pelo K128-CBC. E seja 
+\[
+VetAlterC=BlAlterC(1)||BlAlterC(2)||BlAlterC(3)||BlAlterC(4)||...
+\]%
+o vetor $VetAlter$ criptografado pelo K128-CBC.
+
+\item medir a distância de Hamming, \textbf{separadamente}, entre \textbf{%
+cada} bloco $BlC(k)$ de $128$ bits de $VetEntraC$ e o correspondente bloco $%
+BlAlterC(k)$ de $128$ bits de $VetAlterC$. Para $8$ blocos de $128$ bits,
+tem-se $8$ medidas de distância, sendo cada medida chamada, digamos, $H(k)$
+para cada par de blocos $BlC(k),BlAlterC(k)$. Ou seja, para $k=1,2,3,4,...8$%
+, $H(k)=$Hamming$(BlC(k),BlAlterC(k))$.
+
+\item estas medidas de distância de Hamming $H(k)$ devem ser acumuladas em
+somas chamadas, digamos, $SomaH(k)$. Para $8$ blocos de $128$ bits, tem-se $8
+$ somas cumulativas, sendo que:
+
+\begin{enumerate}
+\item $SomaH(1)$ acumula $128$ valores de $H(1)$ correspondentes a $%
+j=1,2,3...,128$ (para $j\geq 129$ $H(1)=0$ pois $BlC(1)=BlAlterC(1)$ )
+
+\item $SomaH(2)$ acumula $2\ast 128=256$ valores de $H(2)$ correspondentes a 
+$j=1,2,3...,128,$ $129,...,256$ (para $j\geq 257$ $H(2)=0$ pois $%
+BlC(2)=BlAlterC(2)$ e $H(1)=0$ pois $BlC(1)=BlAlterC(1)$ )
+
+\item $SomaH(3)$ acumula $3\ast 128=\allowbreak 384$ valores de $H(3)$
+correspondentes a $j=1,2,3....,384$
+
+\item $SomaH(4)$, acumula $4\ast 128=\allowbreak 512$ valores de $H(4)$
+correspondentes a $j=1,2,3...,512$
+
+\item E assim por diante, até $SomaH(8)$, com $8\ast 128=\allowbreak 1024$
+\end{enumerate}
+
+\item de forma análoga às somas $SomaH(k)$, o programa deve calcular os
+valores mínimo e máximo de $H(1),H(2),...$
+\end{enumerate}
+
+No final o programa deve imprimir uma tabela contendo os valores máximos, mí%
+nimos e médios das distâncias de Hamming entre \textbf{cada} bloco
+criptografado de $128$ bits $BlC(k)$ e $BlAlterC(k)$, conforme o Algoritmo
+K128, no modo CBC. Para $8$ blocos de $128$ bits, o programa deve imprimir $8
+$ valores máximos, $8$ mínimos, e $8$ médias.\medskip 
+
+\noindent {\Large Item 2:} Efetuar o Item 1 uma outra vez, trocando a alteraç%
+ão do $j$-ésimo bit por alteração \textbf{simultânea} do $j$-ésimo e do $%
+(j+8)$-ésimo bits. Isso detetaria uma provável compensação de bits na saída,
+devido a dois bytes consecutivos alterados na entrada. \textbf{Exercício}:
+por quê essa compensação pode ocorrer no modo CBC?
+
+\section{Algoritmo K128}
+
+Implementar o Algoritmo criptográfico K128, com \textbf{chave principal} $K$
+de $128$ bits, e com blocos de entrada e saída de $128$ bits. Você deve 
+\textbf{deduzir} o algoritmo inverso do K128.
+
+\begin{center}
+\begin{tabular}{|c|}
+\hline
+\begin{tabular}{ccccccc}
+&  &  & chave principal &  &  &  \\ 
+&  &  & $K$ ($128$ bits) &  &  &  \\ 
+&  &  & $\downarrow $ &  &  &  \\ \cline{4-4}
+entrada & $128$ bits & $\rightarrow $ & \multicolumn{1}{|c}{Algo. K128} & 
+\multicolumn{1}{|c}{$\rightarrow $} & $128$ bits & saída \\ \cline{4-4}
+&  &  &  &  &  & 
+\end{tabular}
+\\ \hline
+\end{tabular}
+\end{center}
+
+O número $R$ de iterações (\emph{rounds}) é variável, mas neste exercício voc%
+ê deve utilizar $R=12$.
+
+Cada iteração (ou round) da criptografia ou da decriptografia exige $4$
+subchaves de $64$ bits. Para uma iteração $r$, $r=1,...,R$ estas $4$
+subchaves são chamadas $k_{4r-3},k_{4r-2},k_{4r-1},k_{4r}$. A transformação
+final $T()$ exige duas subchaves de $64\,$bits, $k_{4R+1},k_{4R+2}$.
+
+O comprimento da chave principal chamada $K$ é $128$ bits. O número de
+subchaves desejado é $4R+2=4\ast 12+2=50$.
+
+\subsection{As três operações básicas}
+
+Neste projeto há três operações distintas sobre $2^{64}$ elementos (\emph{%
+i.e.}, oito bytes). Se $A,B,C$ denotam três elementos de $64$ bits, as três
+operações são:
+
+\begin{enumerate}
+\item Ou-exclusivo (XOR) sobre $64$ bits, que será representada pelo símbolo 
+$\oplus $, \emph{i.e.}, $A=B\oplus C$; note que $B\oplus C\oplus C=B$, ou
+seja, conhecendo-se $A$ e $C$ pode-se obter $B$.
+
+\item Soma $\func{mod}2^{64}$, que é equivalente à soma usual em que o bit
+mais à esquerda correspondente ao valor $2^{64}$ deve ser sempre igual a
+zero após a soma; esta operação será denotada pelo símbolo $\boxplus $, 
+\emph{i.e.}, $A=B\boxplus C$; note que se $\overline{C}$ é o inverso de $C$
+mod $2^{64}$ (\emph{i.e.}, $\overline{C}+C=2^{64}=0\func{mod}2^{64}$), então 
+$B\boxplus C\boxplus \overline{C}=B$; ou seja, conhecendo-se $A$ e $%
+\overline{C}$ pode-se obter $B$.
+
+\item A terceira operação é representada pelo símbolo $\odot $, e é um pouco
+mais complicada que as anteriores. Seja $y=f(x)$ a função seguinte que
+mapeia um byte $x\in \{0,1\}^{8}$ para um byte $y\in \{0,1\}^{8}$: 
+\[
+y=f(x)=45^{x}\func{mod}257\text{ }(y=0\text{ se }x=128\text{, pois }45^{128}%
+\func{mod}257=\allowbreak 256) 
+\]
+Por exemplo: $45^{31}\func{mod}257=\allowbreak 247$
+
+\begin{enumerate}
+\item 
+\begin{enumerate}
+\item Observe que $257$ é primo e $45$ é gerador do corpo $GF(257)$, \emph{%
+i.e.}, $45^{x}\func{mod}257$ para $x=0,1,2,...,256$ gera todos os elementos
+de $GF(257).$
+
+\item A função inversa de $f()$ , $x=f^{-1}(y)$, é definida a seguir: $%
+x=f^{-1}(y)=\log _{45}y$ $(x=128$ se $y=0$, para ser consistente com a operaç%
+ão anterior$)$ \emph{i.e., }$\log _{45}(45^{x}\func{mod}257)=x$. Por exemplo 
+$\log _{45}247=31$.
+
+\item Recomendamos que estas duas funções sejam previamente calculadas e
+tabeladas na forma $exp[x]=y$ e $log[y]=x$ onde $exp[]$ e $log[]$ são
+vetores de $256$ posições, para $x,y=0,1,2,...,255$. Desta forma,
+economiza-se tempo, pois consultar estes vetores é mais rápido do que
+calcular toda vez que se necessitar de um valor. Note que uma vez calculado
+o valor de $exp[i]$, podemos definir $log[exp[i]]=i$.
+
+\item Para $A,B,C$ de $64$ bits, $A=B\odot C$ significa:
+\end{enumerate}
+
+\begin{itemize}
+\item dividir os $64$ bits de $B$ em $8\,$bytes de $8$ bits: $%
+B_{1}||B_{2}||B_{3}||B_{4}||B_{5}||B_{6}||B_{7}||B_{8}$; dividir da mesma
+forma $C$ em $C_{1}||C_{2}||C_{3}||C_{4}||C_{5}||C_{6}||C_{7}||C_{8}$;
+
+\item Cada byte do resultado $%
+A=A_{1}||A_{2}||A_{3}||A_{4}||A_{5}||A_{6}||A_{7}||A_{8}=B\odot C$ é obtido
+da seguinte forma: para $j=1,2,...8:A_{j}=f(B_{j})\oplus f(C_{j})$.
+\end{itemize}
+\end{enumerate}
+\end{enumerate}
+
+\subsection{Uma iteração (\textit{round}) do K128}
+
+K128 possui $R=12$ iterações (ou \emph{rounds}) e uma transformação final
+que chamaremos $T$. A transformação $T$ utiliza as últimas $2$ subchaves: $%
+k_{4R+1},k_{4R+2}$, da maneira que descreveremos mais adiante. Cada iteração
+utiliza $4$ subchaves e possui duas partes que descreveremos a
+seguir.\medskip 
+
+\begin{center}
+\begin{tabular}{|cccccccccccccccccc|}
+\hline
+&  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+& \multicolumn{4}{c}{Entrada (128 bits)} &  &  &  &  &  &  & 
+\multicolumn{6}{c}{Chave $K$ (128 bits)} &  \\ 
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  & \multicolumn{6}{c}{$%
+\downarrow $} &  \\ \cline{2-5}\cline{12-17}
+& \multicolumn{4}{|c}{128 bits} & \multicolumn{1}{|c}{} &  &  &  &  &  & 
+\multicolumn{6}{|c}{Geração de subchaves} & \multicolumn{1}{|c|}{} \\ 
+\cline{2-5}\cline{12-17}
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  & \multicolumn{6}{c}{$%
+\downarrow $} &  \\ \cline{2-5}
+& \multicolumn{4}{|c}{Iteração 1(2 partes)} & \multicolumn{1}{|c}{\Large $%
+\longleftarrow $} & \multicolumn{4}{c}{$\underbrace{k_{1},k_{2}}_{\text{%
+1a.parte}},\underbrace{k_{3},k_{4}}_{\text{2a.parte}}(128$bits$)$} & 
+\multicolumn{4}{c}{\Large $\longleftarrow \longleftarrow $} &  &  &  &  \\ 
+\cline{2-5}
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  & \multicolumn{6}{c}{$|
+$} &  \\ \cline{2-5}
+& \multicolumn{4}{|c}{128 bits} & \multicolumn{1}{|c}{} &  &  &  &  &  & 
+\multicolumn{6}{c}{$|$} &  \\ \cline{2-5}
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  & \multicolumn{6}{c}{$%
+\downarrow $} &  \\ \cline{2-5}
+& \multicolumn{4}{|c}{Iteração 2(2 partes)} & \multicolumn{1}{|c}{\Large $%
+\longleftarrow $} & \multicolumn{4}{c}{$\underbrace{k_{5},k_{6}}_{\text{%
+1a.parte}},\underbrace{k_{7},k_{8}}_{\text{2a.parte}}(128$bits$)$} & 
+\multicolumn{4}{c}{\Large $\longleftarrow \longleftarrow $} &  &  &  &  \\ 
+\cline{2-5}
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  & \multicolumn{6}{c}{$%
+\downarrow $} &  \\ 
+& \multicolumn{4}{c}{.} &  &  &  &  &  &  & \multicolumn{6}{c}{.} &  \\ 
+& \multicolumn{4}{c}{.} &  &  &  &  &  &  & \multicolumn{6}{c}{.} &  \\ 
+& \multicolumn{4}{c}{.} &  &  &  &  &  &  & \multicolumn{6}{c}{.} &  \\ 
+\cline{2-5}
+& \multicolumn{4}{|c}{128 bits} & \multicolumn{1}{|c}{} &  &  &  &  &  & 
+\multicolumn{6}{c}{$|$} &  \\ \cline{2-5}
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  & \multicolumn{6}{c}{$|
+$} &  \\ \cline{2-5}
+& \multicolumn{4}{|c}{Iteração $R$ (2 partes)} & \multicolumn{1}{|c}{\Large $%
+\longleftarrow $} & \multicolumn{4}{c}{$\underbrace{k_{4R-3},k_{4R-2}},%
+\underbrace{k_{4R-1},k_{4R}}(128$bits$)$} & \multicolumn{4}{c}{\Large $%
+\longleftarrow \longleftarrow $} &  &  &  &  \\ \cline{2-5}
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  & \multicolumn{6}{c}{$%
+\downarrow $} &  \\ \cline{2-5}
+& \multicolumn{4}{|c}{Transf. final $T()$} & \multicolumn{1}{|c}{\Large $%
+\longleftarrow $} & \multicolumn{4}{c}{$k_{4R+1},k_{4R+2}(64$bits$)$} & 
+\multicolumn{4}{c}{\Large $\longleftarrow \longleftarrow $} &  &  &  &  \\ 
+\cline{2-5}
+& \multicolumn{4}{c}{$\downarrow $} &  &  &  &  &  &  &  &  &  &  &  &  & 
+\\ \cline{2-5}
+& \multicolumn{4}{|c}{Saida (128 bits)} & \multicolumn{1}{|c}{} &  &  &  & 
+&  &  &  &  &  &  &  &  \\ \cline{2-5}
+& \multicolumn{16}{c}{Esquema geral do K128} &  \\ 
+&  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ \hline
+\end{tabular}
+\end{center}
+
+\medskip
+
+\subsubsection{Primeira parte de uma iteração}
+
+Esta parte utiliza $2$ subchaves que chamaremos $k_{a},k_{b}$. A sua entrada 
+é de $128$ bits, tratada como $2$ subentradas de $64$ bits que chamaremos $%
+X_{a},X_{b}$. Após certas operações aplicadas sobre esta entrada, a sua saí%
+da será constituída de novas versões destes $X_{a},X_{b}$ que chamaremos $%
+X_{a}^{\prime },X_{b}^{\prime }$, total de $128$ bits \ Na primeira iteraçã%
+o, $k_{a}=k_{1},k_{b}=k_{2}$, e na segunda iteração $k_{a}=k_{5},k_{b}=k_{6}$%
+, e assim por diante.\medskip 
+
+\begin{center}
+\begin{tabular}{|ccccccccc|}
+\hline
+& $X_{a}(64b)$ &  &  &  & $X_{b}(64b)$ &  &  &  \\ 
+& $\downarrow $ &  &  &  & $\downarrow $ &  &  &  \\ \cline{2-2}\cline{6-6}
+& \multicolumn{1}{|c}{$\odot $} & \multicolumn{1}{|c}{$\leftarrow $} & $%
+k_{a}(64b)$ &  & \multicolumn{1}{|c}{$\boxplus $} & \multicolumn{1}{|c}{$%
+\leftarrow $} & $k_{b}(64b)$ &  \\ \cline{2-2}\cline{6-6}
+& $\downarrow $ &  &  &  & $\downarrow $ &  &  &  \\ 
+& $X_{a}^{\prime }(64b)$ &  &  &  & $X_{b}^{\prime }(64b)$ &  &  &  \\ 
+&  &  &  &  &  &  &  &  \\ 
+\multicolumn{9}{|c|}{Primeira parte de uma iteração} \\ \hline
+\end{tabular}
+\end{center}
+
+As operações são as seguintes:
+
+\begin{enumerate}
+\item $X_{a}^{\prime }$ é $X_{a}\odot k_{a}$
+
+\item $X_{b}^{\prime }$ é $X_{b}\boxplus k_{b}$
+\end{enumerate}
+
+% modif 6 abril 99
+Note que o resultado desta parte, em ordem, é  $X_{a}^{\prime
+},X_{b}^{\prime }$.
+
+Observe que estas $2$ operações são inversíveis. Para se obter $X_{a}$ a
+partir de $X_{a}^{\prime }$ basta termos calculado previamente a inversa
+multiplicativa $k_{a}^{-1}$pois $X_{a}^{\prime }\odot k_{a}^{-1}=X_{a}\odot
+k_{a}\odot k_{a}^{-1}=X_{a}$. E para se obter $X_{b}$ a partir de $%
+X_{b}^{\prime }$ basta termos calculado previamente a inversa aditiva $%
+\overline{k_{b}}$, pois $X_{b}^{\prime }\boxplus \overline{k_{b}}%
+=X_{b}\boxplus k_{b}\boxplus \overline{k_{b}}=X_{b}$. 
+
+\subsubsection{Segunda parte de uma iteração}
+
+Essa parte utiliza $2$ subchaves que chamaremos $k_{e},k_{f}$. Sua entrada é
+a saída da primeira parte, de $128$ bits, tratada de novo como $2$
+subentradas de $64$ bits que chamaremos $X_{e},X_{f}$. Após outras operações
+aplicadas sobre esta entrada, sua saída será constituída de novas versões
+destes $X_{e},X_{f}$ que chamaremos $X_{e}^{\prime },X_{f}^{\prime }$. Na
+primeira iteração, $k_{e}=k_{3},k_{f}=k_{4}$, e na segunda iteração $%
+k_{e}=k_{7},k_{f}=k_{8}$ , e assim por diante.
+
+\begin{enumerate}
+\item Inicialmente são calculados dois valores intermediários chamados $Y_{1}
+$ e $Z_{1}$ da seguinte forma:
+
+\begin{enumerate}
+\item $Y_{1}=X_{e}\oplus X_{f}$
+
+\item $Z_{1}=X_{e}\boxplus X_{f}$
+\end{enumerate}
+
+\item A seguir outros dois valores intermediários chamados $Y_{2}$ e $Z_{2}$
+são calculados:
+
+\begin{enumerate}
+\item $Y_{2}=[(k_{e}\odot Y_{1})\boxplus Z_{1}]\odot k_{f}$
+
+\item $Z_{2}=(k_{e}\odot Y_{1})\boxplus Y_{2}$
+\end{enumerate}
+
+\item E os valores $X_{e}^{\prime },X_{f}^{\prime }$ são calculados da
+seguinte maneira:
+
+\begin{enumerate}
+\item $X_{e}^{\prime }=X_{e}\oplus Y_{2}$
+
+\item $X_{f}^{\prime }=X_{f}\boxplus Z_{2}$
+\end{enumerate}
+\end{enumerate}
+
+\subsubsection{A última transformação $T$}
+
+Após $R=12$ iterações da primeira e segunda partes como descrito acima, o
+resultado $X_{e}^{\prime },X_{f}^{\prime }$ é fornecido como entrada para a ú%
+ltima transformação $T$.
+
+Como mencionado anteriormente, a transformação $T$ utiliza as últimas $2$
+subchaves: $k_{4R+1},k_{4R+2}$. E esta tranformação é semelhante à primeira
+parte de uma iteração, exceto que $k_{4R+1}$ é aplicado sobre $X_{f}^{\prime
+}$ e $k_{4R+2}$ é aplicado sobre $X_{e}^{\prime }$:
+
+\begin{enumerate}
+\item $X_{e}^{FINAL}$ é $X_{f}^{\prime }\odot k_{4R+1}$
+
+\item $X_{f}^{FINAL}$ é $X_{e}^{\prime }\boxplus k_{4R+2}$\medskip 
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{|ccccccccc|}
+\hline
+& $X_{f}^{\prime }(64b)$ &  &  &  & $X_{e}^{\prime }(64b)$ &  &  &  \\ 
+& $\downarrow $ &  &  &  & $\downarrow $ &  &  &  \\ \cline{2-2}\cline{6-6}
+& \multicolumn{1}{|c}{$\odot $} & \multicolumn{1}{|c}{$\leftarrow $} & $%
+k_{4R+1}(64b)$ &  & \multicolumn{1}{|c}{$\boxplus $} & \multicolumn{1}{|c}{$%
+\leftarrow $} & $k_{4R+2}(64b)$ &  \\ \cline{2-2}\cline{6-6}
+& $\downarrow $ &  &  &  & $\downarrow $ &  &  &  \\ 
+& $X_{e}^{FINAL}(64b)$ &  &  &  & $X_{f}^{FINAL}(64b)$ &  &  &  \\ 
+&  &  &  &  &  &  &  &  \\ 
+\multicolumn{9}{|c|}{Última transformação $T()$} \\ \hline
+\end{tabular}
+\end{center}
+
+\section{Algoritmo de geração de subchaves}
+
+No início este algoritmo os $128$ bits da chave $K$ em duas variáveis de $64$
+bits, $L_{0}$ e $L_{1}$. A seguir expande $L_{0},L_{1}$ para obter $%
+L_{2},L_{3},$...$L_{4R+2}$.
+
+\begin{itemize}
+\item Seja $\boxplus $ a operação de soma aritmética sobre operandos de $64$
+bits, módulo $2^{64}$.
+
+\item Seja $\beta <<\alpha $ rotação (deslocamento circular) de $\alpha $
+bits para a esquerda dos $64$ bits de $\beta $.
+
+\item $0x(...)$ denota um valor em notação hexadecimal.
+\end{itemize}
+
+\noindent \textbf{Algoritmo de geração de subchaves}
+
+\noindent \textbf{Entrada:} chave principal $K$ de $128$ bits.
+
+\noindent \textbf{Saída:} $4R+2$ subchaves de $64$ bits $%
+k_{1},k_{3},...k_{4R+2}$.
+
+\begin{enumerate}
+\item $L_{0}\leftarrow $\textquotedblleft metade esquerda da chave $K$, $64$
+bits\textquotedblright ; $L_{1}\leftarrow $\textquotedblleft metade direita
+da chave $K$, $64$ bits\textquotedblright 
+
+\item \textbf{para} $j=2,3,...4R+2$ \textbf{faça}: $L_{j}\leftarrow
+L_{j-1}\boxplus 0x(9e3779b97f4a7c15)$; (* $64$ bits *)
+
+\item $k_{0}\leftarrow 0x(8aed2a6bb7e15162)$; (* $64$ bits *)
+
+\item \textbf{para} $j=1,2,...4R+2$ \textbf{faça}: $k_{j}\leftarrow
+k_{j-1}\boxplus 0x(7c159e3779b97f4a)$; 
+
+\item $i\leftarrow 0;j\leftarrow 0;A\leftarrow 0;B\leftarrow 0$;
+
+\item \textbf{para} $s=1,2,3,...4R+2$ \textbf{faça }$\{$
+
+\begin{enumerate}
+\item $k_{i}\leftarrow (k_{i}\boxplus A\boxplus B)\ll 3;A\leftarrow
+k_{i};i\leftarrow i+1$
+
+\item $L_{j}\leftarrow (L_{j}\boxplus A\boxplus B)\ll (A\boxplus
+B);B\leftarrow L_{j};j\leftarrow j+1$
+
+\item $\}$
+\end{enumerate}
+
+\item A saída é $k_{1},k_{2},...k_{4R+2}$
+\end{enumerate}
+
+------------------------------------------FIM
+------------------------------------------------
+
+\end{document}
