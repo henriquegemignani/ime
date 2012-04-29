@@ -1,5 +1,10 @@
 ﻿#include <stdio.h>
 #include <string.h>
+#include "types.h"
+
+/* Nota: nenhuma tentativa de deixar o código mais legível foi feita.
+ Desde que programo bastante em C++, não considero mais possível ter um 
+ código "bonito" em C, principalmente ANSI C. */
 
 #define STR_BUFFER 1024
 
@@ -17,13 +22,23 @@ int trata_modo(char* input) {
         default: return -1;
     }
 }
+bool valida_senha(char* senha) {
+    int num_digito = 0, num_letra = 0, i;
+    for(i = 0; senha[i] != '\0'; ++i) {
+        if(('a' <= senha[i] && senha[i] <= 'z') || ('A' <= senha[i] && senha[i] <= 'Z'))
+            ++num_letra;
+        else if('0' <= senha[i] && senha[i] <= '9')
+            ++num_digito;
+    }
+    return (i >= 8) && (num_digito >= 2) && (num_letra >= 2);
+}
 
 int main(int argc, char** argv) {
     int modo;
     char arquivo_de_entrada[STR_BUFFER];
     char arquivo_de_saida[STR_BUFFER];
     char senha[STR_BUFFER];
-    int apagar = 0;
+    bool apagar = false;
     if(argc < 4) {
         printf("Uso: %s -<modo> -i <arquivo de entrada> [-o <arquivo de saida>] -p <senha> [-a]\n", argv[0]);
         return 1;
@@ -58,6 +73,10 @@ int main(int argc, char** argv) {
     }
     strncpy(senha, argv[5], STR_BUFFER - 1);
     senha[STR_BUFFER - 1] = '\0';
+    if(!valida_senha(senha)) {
+        printf("Senha inválida: '%s'. Necessário pelo menos 8 caraceteres, pelo menos 2 digitos e 2 letras.\n", senha);
+        return 5;
+    }
     
     apagar = (argc == 7);
     
