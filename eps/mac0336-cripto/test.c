@@ -17,17 +17,10 @@ void print_lbyte_vector(char* before, lbyte a[], int size) {
     printf(before);
     for(i = 0; i < size; ++i)
         print_lbyte_as_binary(a[i]);
-    /*printf("\n");*/
+    printf("\n");
 }
 
 int main() {
-    lbyte a[] = { 0x43214321, 0x12341234 }, s[2];
-    unsigned b = 0;
-    while(b <= 64) {
-        fgetc(stdin);
-        operacao_rotacao(a, b, s);
-        print_lbyte_vector("", s, 2);
-        printf("  - %d ", b++);
-    }
+    inicializarVetoresFuncPonto();
     return 0;
 }

@@ -4,6 +4,8 @@
 #include "types.h"
 #define NUM_KEYS 50
 
+void inicializarVetoresFuncPonto();
+
 lbyte primeirosNbits(lbyte l, unsigned int N);
 lbyte ultimosNbits(lbyte l, unsigned int N);
 

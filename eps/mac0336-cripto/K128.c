@@ -1,11 +1,28 @@
 #include <string.h>
+#include <stdio.h>
 #include "K128.h"
 
 static byte ponto_exp[256];
 static byte ponto_log[256];
 
-byte f_ponto(byte x) {
+void adiciona_valor(byte x, byte y) {
+    ponto_exp[x] = y;
+    ponto_log[y] = x;
+    printf("f(%.3u) = %.3u\n", x, y);
 }
+
+void inicializarVetoresFuncPonto() {
+    unsigned int x, result = 1;
+    adiciona_valor(0, 1);
+    for(x = 1; x < 256; ++x) {
+        result = (result * 45) % 257; 
+        if(x == 128)
+            adiciona_valor(x, 0);
+        else
+            adiciona_valor(x, result);
+    }
+}
+
 
 lbyte primeirosNbits(lbyte l, unsigned int N) {
     lbyte mask = ((0x1uL << N) - 1) << (32 - N);
@@ -21,6 +38,8 @@ void operacao_ponto(lbyte a[2], lbyte b[2], lbyte saida[2]) {
 }
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */
 void operacao_soma64(lbyte a[2], lbyte b[2], lbyte saida[2]) {
+    saida[1] = a[1] + b[1];
+    saida[0] = a[0] + b[0] + ((saida[1] < a[1]) || (saida[1] < b[1]));
 }
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com + dentro] */
 void operacao_xor(lbyte a[2], lbyte b[2], lbyte saida[2]) {
