@@ -33,13 +33,16 @@ bool valida_senha(char* senha) {
     return (i >= 8) && (num_digito >= 2) && (num_letra >= 2);
 }
 
+void criptografa(char* entrada, char* saida, char* senha) {
+}
+
 int main(int argc, char** argv) {
     int modo;
     char arquivo_de_entrada[STR_BUFFER];
     char arquivo_de_saida[STR_BUFFER];
     char senha[STR_BUFFER];
     bool apagar = false;
-    if(argc < 4) {
+    if(argc < 6) {
         printf("Uso: %s -<modo> -i <arquivo de entrada> [-o <arquivo de saida>] -p <senha> [-a]\n", argv[0]);
         return 1;
     }
@@ -54,6 +57,14 @@ int main(int argc, char** argv) {
     }
     strncpy(arquivo_de_entrada, argv[3], STR_BUFFER - 1);
     arquivo_de_entrada[STR_BUFFER - 1] = '\0';
+    {
+        FILE* f = fopen(arquivo_de_entrada, "r");
+        if(f == NULL) {
+            printf("Impossível abrir arquivo '%s' para leitura.\n", arquivo_de_entrada);
+            return 5;
+        }
+        fclose(f);
+    }
     
     if(modo == MODO_C || modo == MODO_D) {
         if(strcmp(argv[4], "-o") != 0) {
@@ -62,9 +73,24 @@ int main(int argc, char** argv) {
         }
         strncpy(arquivo_de_saida, argv[5], STR_BUFFER - 1);
         arquivo_de_saida[STR_BUFFER - 1] = '\0';
+        
+        {
+            FILE* f = fopen(arquivo_de_saida, "a");
+            if(f == NULL) {
+                printf("Impossível abrir arquivo '%s' para escrita.\n", arquivo_de_saida);
+                return 5;
+            }
+            fclose(f);
+        }
+        
         argv++;
         argv++;
         argc -= 2;
+        
+        if(argc < 6) {
+            printf("Uso: %s -<modo> -i <arquivo de entrada> [-o <arquivo de saida>] -p <senha> [-a]\n", argv[0]);
+            return 1;
+        }
     }
     
     if(strcmp(argv[4], "-p") != 0) {
