@@ -196,7 +196,22 @@ void GeraSubChaves(lbyte K[4], lbyte k[][2]) {
     }
 }
 
-void K128_R12(lbyte entrada[4], lbyte saida[4], lbyte chave[4]) {
+void K128_Encrypt(lbyte entrada[4], lbyte saida[4], lbyte chave[4]) {
+    lbyte buffer[4];
+    lbyte K_lista[NUM_KEYS(R)][2];
+    int i;
+    GeraSubChaves(chave, K_lista);
+    
+    memcpy(buffer, entrada, 16);
+    for(i = 0; i < R; ++i) {
+        K128_Iteracao(buffer, saida, K_lista + 4*i);
+        memcpy(buffer, saida, 16);
+    }
+    /* Ultima transformação T */
+    K128_Iteracao_Parte1(buffer, buffer + 2, saida, saida + 2, K_lista[4*R], K_lista[4*R + 1]);
+}
+
+void K128_Decrypt(lbyte entrada[4], lbyte saida[4], lbyte chave[4]) {
     lbyte buffer[4];
     lbyte K_lista[NUM_KEYS(R)][2];
     int i;
