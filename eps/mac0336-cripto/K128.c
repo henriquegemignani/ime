@@ -8,7 +8,6 @@ static byte ponto_log[256];
 void adiciona_valor(byte x, byte y) {
     ponto_exp[x] = y;
     ponto_log[y] = x;
-    printf("f(%.3u) = %.3u\n", x, y);
 }
 
 void inicializarVetoresFuncPonto() {
@@ -33,8 +32,36 @@ lbyte ultimosNbits(lbyte l, unsigned int N) {
     return (l & mask);
 }
 
+void convert_lbyte_to_bytes(lbyte l, byte b[4]) {
+    b[0] = l & 0xFF000000 >> 6;
+    b[1] = l & 0x00FF0000 >> 4;
+    b[2] = l & 0x0000FF00 >> 2;
+    b[3] = l & 0x000000FF;
+}
+
+lbyte convert_bytes_to_lbyte(byte b[4]) {
+    lbyte result = 0;
+    result |= b[0] << 6;
+    result |= b[1] << 4;
+    result |= b[2] << 2;
+    result |= b[3] << 6;
+    return result;
+}
+
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com . dentro] */
 void operacao_ponto(lbyte a[2], lbyte b[2], lbyte saida[2]) {
+    byte aB[8], bB[8];
+    int i;
+    convert_lbyte_to_bytes(a[0], aB);
+    convert_lbyte_to_bytes(a[1], aB + 4);
+    convert_lbyte_to_bytes(b[0], bB);
+    convert_lbyte_to_bytes(b[1], bB + 4);
+    for(i = 0; i < 8; ++i) {
+        aB[0] = ponto_exp[aB[0]];
+        bB[0] = ponto_exp[bB[0]];
+    }
+    saida[0] = convert_bytes_to_lbyte(aB) ^ convert_bytes_to_lbyte(bB);
+    saida[1] = convert_bytes_to_lbyte(aB + 4) ^ convert_bytes_to_lbyte(bB + 4);
 }
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */
 void operacao_soma64(lbyte a[2], lbyte b[2], lbyte saida[2]) {
