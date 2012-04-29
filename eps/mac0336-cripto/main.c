@@ -34,13 +34,9 @@ bool valida_senha(char* senha) {
     return (i >= 8) && (num_digito >= 2) && (num_letra >= 2);
 }
 
-void criptografa(char* nome_entrada, char* nome_saida, char* senha) {
-    FILE* entrada = fopen(nome_entrada, "rb");
-    FILE* saida = fopen(nome_saida, "wb");
+void gera_chave_da_senha(char* senha, lbyte k[4]) { /* Chave de 128 bits */
     byte kB[16];
-    lbyte k[4]; /* Chave de 128 bits */
     size_t senha_size = strlen(senha);
-    unsigned long source_size = 0;
     if(senha_size < 16) {
         /* senha_size é pelo menos 8 pela validação de senha acima. */
         memcpy(kB, senha, senha_size);
@@ -52,29 +48,40 @@ void criptografa(char* nome_entrada, char* nome_saida, char* senha) {
     k[1] = convert_bytes_to_lbyte(kB + 4);
     k[2] = convert_bytes_to_lbyte(kB + 8);
     k[3] = convert_bytes_to_lbyte(kB + 12);
+}
+
+void criptografa_raw(FILE* entrada, FILE* saida, lbyte k[4]) { /* Chave de 128 bits */
+    unsigned long source_size = 0;
+    size_t actual_read = 0;
+    lbyte bloco_anterior[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    do {
+        lbyte ent[4], sai[4];
+        source_size += actual_read = fread(ent, 1, 16, entrada);
+
+        /* CFC: XOR com o bloco criptografado anterior. */
+        {   int i;
+            for(i = 0; i < 4; ++i) ent[i] ^= bloco_anterior[i]; }
+
+        K128_R12(ent, sai, k);
+
+        if(actual_read < 16) /* Last block. */
+            memset(((byte*)sai) + actual_read, 0xFF, 16 - actual_read);
+        fwrite(sai, 1, 16, saida);
+
+        /* Guarda saída para o CFC do próximo bloco. */
+        memcpy(bloco_anterior, sai, 16);
+    } while(actual_read == 16);
+}
+
+void criptografa(char* nome_entrada, char* nome_saida, char* senha) {
+    FILE* entrada = fopen(nome_entrada, "rb");
+    FILE* saida = fopen(nome_saida, "wb");
+    lbyte k[4]; /* Chave de 128 bits */
+    gera_chave_da_senha(senha, k);
 
     printf("Encrypting '%s' to '%s'...\n", nome_entrada, nome_saida);
-    {
-        size_t actual_read = 0;
-        lbyte bloco_anterior[4];
-        memset(bloco_anterior, 0xFF, 16);
-        do {
-            lbyte ent[4], sai[4];
-            int i;
-            source_size += actual_read = fread(ent, 1, 16, entrada);
+    criptografa_raw(entrada, saida, k);
 
-            for(i = 0; i < 4; ++i) ent[i] ^= bloco_anterior[i];
-
-            K128_R12(ent, sai, k); /* usar CBC */
-
-            if(actual_read < 16) /* Last block. */
-                memset(((byte*)sai) + actual_read, 0xFF, 16 - actual_read);
-            fwrite(sai, 1, 16, saida);
-
-            memcpy(bloco_anterior, sai, 16);
-
-        } while(actual_read == 16);
-    }
     fclose(entrada);
     fclose(saida);
 }
