@@ -17,18 +17,18 @@ lbyte ultimosNbits(lbyte l, unsigned int N) {
 }
 
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com . dentro] */
-void operacao_ponto(lbyte a[], lbyte b[], lbyte saida[]) {
+void operacao_ponto(lbyte a[2], lbyte b[2], lbyte saida[2]) {
 }
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */
-void operacao_soma64(lbyte a[], lbyte b[], lbyte saida[]) {
+void operacao_soma64(lbyte a[2], lbyte b[2], lbyte saida[2]) {
 }
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com + dentro] */
-void operacao_xor(lbyte a[], lbyte b[], lbyte saida[]) {
+void operacao_xor(lbyte a[2], lbyte b[2], lbyte saida[2]) {
     saida[0] = a[0] ^ b[0];
     saida[1] = a[1] ^ b[1];
 }
 /* B: inteiro, a, saida: 64 bits (8 bytes) [no enunciado: <<] */
-void operacao_rotacao(lbyte a[], unsigned int b, lbyte s[]) {
+void operacao_rotacao(lbyte a[2], unsigned int b, lbyte s[2]) {
     if(b >= 64) {
         operacao_rotacao(a, b % 64, s);
     } else if(b == 0) {
@@ -51,12 +51,22 @@ void operacao_rotacao(lbyte a[], unsigned int b, lbyte s[]) {
     }
 }
 
-void K128_Iteracao_Parte1(lbyte Xa[], lbyte Xb[], lbyte XaL[], lbyte XbL[], lbyte kA[], lbyte kB[]) {
+/* a, b, saida: 64 bits (8 bytes) */
+void operacao_rotacao_por_lbyte(lbyte a[2], lbyte b[2], lbyte s[2]) {
+    int num_bits = 0, i;
+    lbyte val;
+    for(i = 0; i < 2; i++)
+        for(val = b[i]; val > 0; val >>= 1)
+            if((val & 1) != 0) num_bits++;
+    operacao_rotacao(a, num_bits, s);
+}
+
+void K128_Iteracao_Parte1(lbyte Xa[2], lbyte Xb[2], lbyte XaL[2], lbyte XbL[2], lbyte kA[2], lbyte kB[2]) {
     operacao_ponto(Xa, kA, XaL);
     operacao_soma64(Xb, kB, XbL);
 }
 
-void K128_Iteracao_Parte2(lbyte Xe[], lbyte Xf[], lbyte XeL[], lbyte XfL[], lbyte kE[], lbyte kF[]) {
+void K128_Iteracao_Parte2(lbyte Xe[2], lbyte Xf[2], lbyte XeL[2], lbyte XfL[2], lbyte kE[2], lbyte kF[2]) {
     lbyte Y1[2], Z1[2];
     lbyte Y2[2], Z2[2];
     lbyte aux1[2], aux2[2];
@@ -79,16 +89,15 @@ void K128_Iteracao_Parte2(lbyte Xe[], lbyte Xf[], lbyte XeL[], lbyte XfL[], lbyt
 }
 
 /* entrada, saida e chave: 128 bits (16 bytes) */
-void K128_Iteracao(lbyte entrada[], lbyte saida[], lbyte* chaves[]) {
+void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[2][NUM_KEYS]) {
     lbyte Xbuffer[4];       
     K128_Iteracao_Parte1(entrada, entrada + 2, Xbuffer, Xbuffer + 2, chaves[0], chaves[1]); /* k1 e k2 */
     K128_Iteracao_Parte2(Xbuffer, Xbuffer + 2,   saida,   saida + 2, chaves[2], chaves[2]); /* k3 e k4 */
 }
 
-void GeraSubChaves(lbyte K[], lbyte* K_lista[]) {
+void GeraSubChaves(lbyte K[2], lbyte k[2][50]) {
     int R = 12, i, j, s;
     lbyte L[2][4*12 + 2];
-    lbyte k[2][4*12 + 2];
     lbyte A[2], B[2];
     
     static lbyte magic_num1[] = { 0x9E3779B9, 0x7F4A7C15 }; /* 0x9e3779b97f4a7c15 */
@@ -119,10 +128,21 @@ void GeraSubChaves(lbyte K[], lbyte* K_lista[]) {
     for(s = 1; s <= 4*R + 2; ++s) {
         lbyte aux1[2], aux2[2];
         
+        operacao_soma64(k[i], A, aux1);
+        operacao_soma64(aux1, B, aux2);
+        operacao_rotacao(aux2, 3, k[i]);
+        memcpy(A, k[i], 8);
+        i++;
+        
+        operacao_soma64(A, B, aux1); /* aux1 = A [+] B */
+        operacao_soma64(L[i], aux1, aux2); /* aux2 = Li [+] A [+] B */
+        operacao_rotacao_por_lbyte(aux2, aux1, L[i]); /* Li = aux2 << aux1 = (Li [+] A [+] B) << (A [+] B) */
+        memcpy(B, L[i], 8);
+        j++;
     }
 }
 
-void K128_R12(lbyte entrada[], lbyte saida[], lbyte chave[]) {
+void K128_R12(lbyte entrada[2], lbyte saida[2], lbyte chave[2]) {
     int R = 12;
     lbyte buffer[4];
     lbyte K_lista[2][4*12 + 2];
@@ -132,12 +152,9 @@ void K128_R12(lbyte entrada[], lbyte saida[], lbyte chave[]) {
     GeraSubChaves(chave, K_lista);
     
     for(i = 0; i < R; ++i) {
-        K128_Iteracao(buffer, saida, K_lista);
+        K128_Iteracao(buffer, saida, K_lista + 4*i);
         memcpy(buffer, saida, 16);
     }
-    {
-        /* Ultima transformação T */
-        lbyte kR1[2], kR2[2];
-        K128_Iteracao_Parte1(buffer, buffer + 8, saida, saida + 8, kR1, kR2);
-    }
+    /* Ultima transformação T */
+    K128_Iteracao_Parte1(buffer, buffer + 2, saida, saida + 2, K_lista[4*R], K_lista[4*R + 1]);
 }
