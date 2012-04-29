@@ -49,6 +49,8 @@ void criptografa(char* nome_entrada, char* nome_saida, char* senha) {
     }
     k[0] = convert_bytes_to_lbyte(kB);
     k[1] = convert_bytes_to_lbyte(kB + 4);
+    
+    printf("Encrypting '%s' to '%s'...\n", nome_entrada, nome_saida);
     while(!feof(entrada)) {
         lbyte ent[2], sai[2];
         fread(ent, 16, 1, entrada);
@@ -141,7 +143,7 @@ int main(int argc, char** argv) {
     switch(modo) {
         case MODO_1: break;
         case MODO_2: break;
-        case MODO_C: break;
+        case MODO_C:
             criptografa(arquivo_de_entrada, arquivo_de_saida, senha);
             if(apagar) {
                 FILE* f = fopen(arquivo_de_entrada, "w");
