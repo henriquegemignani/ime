@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 #include "K128.h"
 
 static byte ponto_exp[256];
@@ -167,8 +166,8 @@ void GeraSubChaves(lbyte K[2], lbyte k[2][50]) {
     
     /* Passo 5. */
     i = j = 0;
-    memcpy(A, 0, 8);
-    memcpy(B, 0, 8);
+    memset(A, 0, 8);
+    memset(B, 0, 8);
     
     /* Passo 6. */
     for(s = 1; s <= 4*R + 2; ++s) {
