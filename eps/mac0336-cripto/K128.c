@@ -1,6 +1,9 @@
 #include <string.h>
 #include "K128.h"
 
+#define R 12
+#define NUM_KEYS(R) (4*(R)+2)
+
 static byte ponto_exp[256];
 static byte ponto_log[256];
 
@@ -140,62 +143,66 @@ void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[][2]) {
     K128_Iteracao_Parte2(Xbuffer, Xbuffer + 2,   saida,   saida + 2, chaves[2], chaves[2]); /* k3 e k4 */
 }
 
-void GeraSubChaves(lbyte K[2], lbyte k[][2]) {
-    int R = 12, i, j, s;
-    lbyte L[4*12 + 2][2];
-    lbyte A[2], B[2];
+void GeraSubChaves(lbyte K[4], lbyte k[][2]) {
+    lbyte L[NUM_KEYS(R)][2];
+
+    {
+        int j;
+        static lbyte magic_num1[] = { 0x9E3779B9, 0x7F4A7C15 }; /* 0x9e3779b97f4a7c15 */
+        static lbyte magic_num2[] = { 0x8AED2A6B, 0xB7E15162 }; /* 0x8aed2a6bb7e15162 */
+        static lbyte magic_num3[] = { 0x7C159E37, 0x79B97F4A }; /* 0x7c159e3779b97f4a */
     
-    static lbyte magic_num1[] = { 0x9E3779B9, 0x7F4A7C15 }; /* 0x9e3779b97f4a7c15 */
-    static lbyte magic_num2[] = { 0x8AED2A6B, 0xB7E15162 }; /* 0x8aed2a6bb7e15162 */
-    static lbyte magic_num3[] = { 0x7C159E37, 0x79B97F4A }; /* 0x7c159e3779b97f4a */
+        /* Passo 1. */
+        memcpy(L[0], &K[0], 8);
+        memcpy(L[1], &K[2], 8);
     
-    /* Passo 1. */
-    memcpy(L[0], K, 8);
-    memcpy(L[1], K + 8, 8); /* Provavelmente um único memcpy com num = 16 basta... */
-    
-    /* Passo 2. */
-    for(j = 2; j <= 4*R + 2; ++j)
-        operacao_soma64(L[j-1], magic_num1, L[j]);
+        /* Passo 2. */
+        for(j = 2; j < NUM_KEYS(R); ++j)
+            operacao_soma64(L[j-1], magic_num1, L[j]);
         
-    /* Passo 3. */
-    memcpy(k[0], magic_num2, 8);
+        /* Passo 3. */
+        memcpy(k[0], magic_num2, 8);
     
-    /* Passo 4. */
-    for(j = 1; j <= 4*R + 2; ++j)
-        operacao_soma64(k[j-1], magic_num3, k[j]);
-    
-    /* Passo 5. */
-    i = j = 0;
-    memset(A, 0, 8);
-    memset(B, 0, 8);
-    
-    /* Passo 6. */
-    for(s = 1; s <= 4*R + 2; ++s) {
-        lbyte aux1[2], aux2[2];
+        /* Passo 4. */
+        for(j = 1; j < NUM_KEYS(R); ++j)
+            operacao_soma64(k[j-1], magic_num3, k[j]);
+
+    }
+    {
+        lbyte A[2], B[2];
+        int s, i = 0, j = 0;
+
+        /* Passo 5. */
         
-        operacao_soma64(k[i], A, aux1);
-        operacao_soma64(aux1, B, aux2);
-        operacao_rotacao(aux2, 3, k[i]);
-        memcpy(A, k[i], 8);
-        i++;
+        memset(A, 0, 8);
+        memset(B, 0, 8);
+    
+        /* Passo 6. */
+        for(s = 1; s < NUM_KEYS(R); ++s) {
+            lbyte aux1[2], aux2[2];
         
-        operacao_soma64(A, B, aux1); /* aux1 = A [+] B */
-        operacao_soma64(L[i], aux1, aux2); /* aux2 = Li [+] A [+] B */
-        operacao_rotacao_por_lbyte(aux2, aux1, L[i]); /* Li = aux2 << aux1 = (Li [+] A [+] B) << (A [+] B) */
-        memcpy(B, L[i], 8);
-        j++;
+            operacao_soma64(k[i], A, aux1);
+            operacao_soma64(aux1, B, aux2);
+            operacao_rotacao(aux2, 3, k[i]);
+            memcpy(A, k[i], 8);
+            i++;
+        
+            operacao_soma64(A, B, aux1); /* aux1 = A [+] B */
+            operacao_soma64(L[i], aux1, aux2); /* aux2 = Li [+] A [+] B */
+            operacao_rotacao_por_lbyte(aux2, aux1, L[i]); /* Li = aux2 << aux1 = (Li [+] A [+] B) << (A [+] B) */
+            memcpy(B, L[i], 8);
+            j++;
+        }
     }
 }
 
-void K128_R12(lbyte entrada[2], lbyte saida[2], lbyte chave[2]) {
-    int R = 12;
+void K128_R12(lbyte entrada[4], lbyte saida[4], lbyte chave[4]) {
     lbyte buffer[4];
-    lbyte K_lista[4*12 + 2][2];
+    lbyte K_lista[NUM_KEYS(R)][2];
     int i;
-    memcpy(buffer, entrada, 16);
-    
     GeraSubChaves(chave, K_lista);
     
+    memcpy(buffer, entrada, 16);
     for(i = 0; i < R; ++i) {
         K128_Iteracao(buffer, saida, K_lista + 4*i);
         memcpy(buffer, saida, 16);
