@@ -9,6 +9,9 @@ void inicializarVetoresFuncPonto();
 lbyte primeirosNbits(lbyte l, unsigned int N);
 lbyte ultimosNbits(lbyte l, unsigned int N);
 
+void convert_lbyte_to_bytes(lbyte l, byte b[4]);
+lbyte convert_bytes_to_lbyte(byte b[4]);
+
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com . dentro] */
 void operacao_ponto(lbyte a[2], lbyte b[2], lbyte saida[2]);
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */

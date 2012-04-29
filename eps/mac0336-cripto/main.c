@@ -1,6 +1,7 @@
 ﻿#include <stdio.h>
 #include <string.h>
 #include "types.h"
+#include "K128.h"
 
 /* Nota: nenhuma tentativa de deixar o código mais legível foi feita.
  Desde que programo bastante em C++, não considero mais possível ter um 
@@ -33,7 +34,29 @@ bool valida_senha(char* senha) {
     return (i >= 8) && (num_digito >= 2) && (num_letra >= 2);
 }
 
-void criptografa(char* entrada, char* saida, char* senha) {
+void criptografa(char* nome_entrada, char* nome_saida, char* senha) {
+    FILE* entrada = fopen(nome_entrada, "r");
+    FILE* saida = fopen(nome_saida, "w");
+    byte kB[16];
+    lbyte k[2];
+    size_t senha_size = strlen(senha);
+    if(senha_size < 16) {
+        /* senha_size é pelo menos 8 pela validação de senha acima. */
+        memcpy(kB, senha, senha_size);
+        memcpy(kB + senha_size, senha, 16 - senha_size);
+    } else {
+        memcpy(kB, senha, 16);
+    }
+    k[0] = convert_bytes_to_lbyte(kB);
+    k[1] = convert_bytes_to_lbyte(kB + 4);
+    while(!feof(entrada)) {
+        lbyte ent[2], sai[2];
+        fread(ent, 16, 1, entrada);
+        K128_R12(ent, sai, k); /* usar CBC */
+        fwrite(sai, 16, 1, saida);
+    }
+    fclose(entrada);
+    fclose(saida);
 }
 
 int main(int argc, char** argv) {
@@ -111,5 +134,22 @@ int main(int argc, char** argv) {
     printf("Saida: %s\n", arquivo_de_saida);
     printf("Senha: %s\n", senha);
     printf("Apagar: %d\n", apagar);
+    
+    /* Necessidade. */
+    inicializarVetoresFuncPonto();
+    
+    switch(modo) {
+        case MODO_1: break;
+        case MODO_2: break;
+        case MODO_C: break;
+            criptografa(arquivo_de_entrada, arquivo_de_saida, senha);
+            if(apagar) {
+                FILE* f = fopen(arquivo_de_entrada, "w");
+                if(f) fclose(f);
+            }
+        case MODO_D: break;
+        default: break;
+    }
+    
     return 0;
 }
