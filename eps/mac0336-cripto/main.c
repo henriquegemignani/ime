@@ -38,7 +38,7 @@ void criptografa(char* nome_entrada, char* nome_saida, char* senha) {
     FILE* entrada = fopen(nome_entrada, "r");
     FILE* saida = fopen(nome_saida, "w");
     byte kB[16];
-    lbyte k[2];
+    lbyte k[4]; /* Chave de 128 bits */
     size_t senha_size = strlen(senha);
     if(senha_size < 16) {
         /* senha_size é pelo menos 8 pela validação de senha acima. */
@@ -49,6 +49,8 @@ void criptografa(char* nome_entrada, char* nome_saida, char* senha) {
     }
     k[0] = convert_bytes_to_lbyte(kB);
     k[1] = convert_bytes_to_lbyte(kB + 4);
+    k[2] = convert_bytes_to_lbyte(kB + 8);
+    k[3] = convert_bytes_to_lbyte(kB + 12);
     
     printf("Encrypting '%s' to '%s'...\n", nome_entrada, nome_saida);
     while(!feof(entrada)) {

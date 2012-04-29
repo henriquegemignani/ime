@@ -2,7 +2,6 @@
 #define K128_H_
 
 #include "types.h"
-#define NUM_KEYS 50
 
 void inicializarVetoresFuncPonto();
 
@@ -26,8 +25,8 @@ void operacao_rotacao_por_lbyte(lbyte a[2], lbyte b[2], lbyte s[2]);
 
 void K128_Iteracao_Parte1(lbyte Xa[2], lbyte Xb[2], lbyte XaL[2], lbyte XbL[2], lbyte kA[2], lbyte kB[2]);
 void K128_Iteracao_Parte2(lbyte Xe[2], lbyte Xf[2], lbyte XeL[2], lbyte XfL[2], lbyte kE[2], lbyte kF[2]);
-void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[2][NUM_KEYS]);
-void GeraSubChaves(lbyte K[], lbyte K_lista[2][NUM_KEYS]);
+void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[][2]);
+void GeraSubChaves(lbyte K[], lbyte K_lista[][2]);
 void K128_R12(lbyte entrada[2], lbyte saida[2], lbyte chave[2]);
 
 

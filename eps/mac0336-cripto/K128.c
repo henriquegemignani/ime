@@ -15,9 +15,9 @@ void inicializarVetoresFuncPonto() {
     for(x = 1; x < 256; ++x) {
         result = (result * 45) % 257; 
         if(x == 128)
-            adiciona_valor(x, 0);
+            adiciona_valor((byte) x, 0);
         else
-            adiciona_valor(x, result);
+            adiciona_valor((byte) x, (byte) result);
     }
 }
 
@@ -32,18 +32,18 @@ lbyte ultimosNbits(lbyte l, unsigned int N) {
 }
 
 void convert_lbyte_to_bytes(lbyte l, byte b[4]) {
-    b[0] = l & 0xFF000000 >> 6;
-    b[1] = l & 0x00FF0000 >> 4;
-    b[2] = l & 0x0000FF00 >> 2;
-    b[3] = l & 0x000000FF;
+    b[0] = (byte)((l & 0xFF000000) >> 6);
+    b[1] = (byte)((l & 0x00FF0000) >> 4);
+    b[2] = (byte)((l & 0x0000FF00) >> 2);
+    b[3] = (byte)((l & 0x000000FF));
 }
 
 lbyte convert_bytes_to_lbyte(byte b[4]) {
     lbyte result = 0;
-    result |= b[0] << 6;
-    result |= b[1] << 4;
-    result |= b[2] << 2;
-    result |= b[3] << 6;
+    result |= (b[0] << 24);
+    result |= (b[1] << 16);
+    result |= (b[2] << 8);
+    result |= b[3];
     return result;
 }
 
@@ -134,15 +134,15 @@ void K128_Iteracao_Parte2(lbyte Xe[2], lbyte Xf[2], lbyte XeL[2], lbyte XfL[2], 
 }
 
 /* entrada, saida e chave: 128 bits (16 bytes) */
-void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[2][NUM_KEYS]) {
+void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[][2]) {
     lbyte Xbuffer[4];       
     K128_Iteracao_Parte1(entrada, entrada + 2, Xbuffer, Xbuffer + 2, chaves[0], chaves[1]); /* k1 e k2 */
     K128_Iteracao_Parte2(Xbuffer, Xbuffer + 2,   saida,   saida + 2, chaves[2], chaves[2]); /* k3 e k4 */
 }
 
-void GeraSubChaves(lbyte K[2], lbyte k[2][50]) {
+void GeraSubChaves(lbyte K[2], lbyte k[][2]) {
     int R = 12, i, j, s;
-    lbyte L[2][4*12 + 2];
+    lbyte L[4*12 + 2][2];
     lbyte A[2], B[2];
     
     static lbyte magic_num1[] = { 0x9E3779B9, 0x7F4A7C15 }; /* 0x9e3779b97f4a7c15 */
@@ -190,7 +190,7 @@ void GeraSubChaves(lbyte K[2], lbyte k[2][50]) {
 void K128_R12(lbyte entrada[2], lbyte saida[2], lbyte chave[2]) {
     int R = 12;
     lbyte buffer[4];
-    lbyte K_lista[2][4*12 + 2];
+    lbyte K_lista[4*12 + 2][2];
     int i;
     memcpy(buffer, entrada, 16);
     

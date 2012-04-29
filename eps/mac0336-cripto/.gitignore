@@ -1,0 +1,14 @@
+*.vcxproj*
+*.exe
+CMakeFiles/
+crypt.dir/
+crypt-test.dir/
+Debug/
+ipch/
+Win32/
+*.sln
+*.suo
+*.sdf
+*.opensdf
+*.cmake
+final.bin
