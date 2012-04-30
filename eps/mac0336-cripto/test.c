@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "K128.h"
 
 void print_lbyte_as_binary(lbyte l) {
@@ -21,6 +23,19 @@ void print_lbyte_vector(char* before, lbyte a[], int size) {
 }
 
 int main() {
+    int i;
+
+    srand(time(NULL));
+
+    for(i = 0; i < 1000; i++) {
+        lbyte oposto[2], soma[2], a[2];
+        a[0] = rand();
+        a[1] = rand();
+        operacao_oposto_soma64(a, oposto);
+        operacao_soma64(a, oposto, soma);
+        print_lbyte_vector("sum: ", soma, 2);
+    }
+
     inicializarVetoresFuncPonto();
     return 0;
 }

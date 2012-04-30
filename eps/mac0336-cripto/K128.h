@@ -9,10 +9,13 @@ lbyte primeirosNbits(lbyte l, unsigned int N);
 lbyte ultimosNbits(lbyte l, unsigned int N);
 
 void convert_lbyte_to_bytes(lbyte l, byte b[4]);
+void convert_2lbytes_to_bytes(lbyte l[2], byte b[8]);
 lbyte convert_bytes_to_lbyte(byte b[4]);
 
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com . dentro] */
 void operacao_ponto(lbyte a[2], lbyte b[2], lbyte saida[2]);
+void operacao_ponto_inverso(lbyte xL[2], lbyte k[2], lbyte x[2]);
+
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */
 void operacao_soma64(lbyte a[2], lbyte b[2], lbyte saida[2]);
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com + dentro] */

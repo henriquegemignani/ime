@@ -40,6 +40,10 @@ void convert_lbyte_to_bytes(lbyte l, byte b[4]) {
     b[2] = (byte)((l & 0x0000FF00) >> 2);
     b[3] = (byte)((l & 0x000000FF));
 }
+void convert_2lbytes_to_bytes(lbyte l[2], byte b[8]) {
+    convert_lbyte_to_bytes(l[0], b);
+    convert_lbyte_to_bytes(l[1], b + 4);
+}
 
 lbyte convert_bytes_to_lbyte(byte b[4]) {
     lbyte result = 0;
@@ -54,17 +58,28 @@ lbyte convert_bytes_to_lbyte(byte b[4]) {
 void operacao_ponto(lbyte a[2], lbyte b[2], lbyte saida[2]) {
     byte aB[8], bB[8];
     int i;
-    convert_lbyte_to_bytes(a[0], aB);
-    convert_lbyte_to_bytes(a[1], aB + 4);
-    convert_lbyte_to_bytes(b[0], bB);
-    convert_lbyte_to_bytes(b[1], bB + 4);
+    convert_2lbytes_to_bytes(a, aB);
+    convert_2lbytes_to_bytes(b, bB);
     for(i = 0; i < 8; ++i) {
-        aB[0] = ponto_exp[aB[0]];
-        bB[0] = ponto_exp[bB[0]];
+        aB[i] = ponto_exp[aB[i]];
+        bB[i] = ponto_exp[bB[i]];
     }
     saida[0] = convert_bytes_to_lbyte(aB) ^ convert_bytes_to_lbyte(bB);
     saida[1] = convert_bytes_to_lbyte(aB + 4) ^ convert_bytes_to_lbyte(bB + 4);
 }
+void operacao_ponto_inverso(lbyte xL[2], lbyte k[2], lbyte x[2]) {
+    /* X' = X (*) K -> X' = f(X) ^ f(K) -> X' ^ f(K) = f(X) -> 
+       -> fINV(x' ^ f(K)) = fINV(f(X)) = X. */
+    byte xLB[8], kB[8];
+    int i;
+    convert_2lbytes_to_bytes(xL, xLB);
+    convert_2lbytes_to_bytes(k, kB);
+    for(i = 0; i < 8; ++i)
+        xLB[i] = ponto_log[xLB[i] ^ ponto_exp[kB[i]]];
+    x[0] = convert_bytes_to_lbyte(xLB);
+    x[1] = convert_bytes_to_lbyte(xLB + 4);
+}
+
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */
 void operacao_soma64(lbyte a[2], lbyte b[2], lbyte saida[2]) {
     saida[1] = a[1] + b[1];
@@ -152,11 +167,13 @@ void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[][2]) {
 
 void K128_Iteracao_Parte1_INV(lbyte Xa[2], lbyte Xb[2], lbyte XaL[2], lbyte XbL[2], lbyte kA[2], lbyte kB[2]) {
     lbyte kB_INV[2];
+    /* X' = X (*) K -> X' = f(X) ^ f(K) -> X' ^ f(K) = f(X) -> 
+       -> fINV(x' ^ f(K)) = fINV(f(X)) = X. */
+    operacao_ponto_inverso(Xa, kA, XaL);
 
+    /* X + K = X'; X + K + (-K) = X; X' + (-K) = X. */
     operacao_oposto_soma64(kB, kB_INV);
-
-    operacao_ponto(Xa, kA, XaL);
-    operacao_soma64(Xb, kB, XbL);
+    operacao_soma64(Xb, kB_INV, XbL);
 }
 
 void GeraSubChaves(lbyte K[4], lbyte k[][2]) {
