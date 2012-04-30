@@ -109,6 +109,13 @@ void operacao_rotacao_por_lbyte(lbyte a[2], lbyte b[2], lbyte s[2]) {
     operacao_rotacao(a, num_bits, s);
 }
 
+void operacao_oposto_soma64(lbyte a[2], lbyte saida[2]) {
+    saida[0] = ~a[0];
+    saida[1] = ~a[1] + 1;
+    if(saida[1] == 0) saida[0]++;
+}
+
+
 void K128_Iteracao_Parte1(lbyte Xa[2], lbyte Xb[2], lbyte XaL[2], lbyte XbL[2], lbyte kA[2], lbyte kB[2]) {
     operacao_ponto(Xa, kA, XaL);
     operacao_soma64(Xb, kB, XbL);
@@ -141,6 +148,15 @@ void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[][2]) {
     lbyte Xbuffer[4];       
     K128_Iteracao_Parte1(entrada, entrada + 2, Xbuffer, Xbuffer + 2, chaves[0], chaves[1]); /* k1 e k2 */
     K128_Iteracao_Parte2(Xbuffer, Xbuffer + 2,   saida,   saida + 2, chaves[2], chaves[2]); /* k3 e k4 */
+}
+
+void K128_Iteracao_Parte1_INV(lbyte Xa[2], lbyte Xb[2], lbyte XaL[2], lbyte XbL[2], lbyte kA[2], lbyte kB[2]) {
+    lbyte kB_INV[2];
+
+    operacao_oposto_soma64(kB, kB_INV);
+
+    operacao_ponto(Xa, kA, XaL);
+    operacao_soma64(Xb, kB, XbL);
 }
 
 void GeraSubChaves(lbyte K[4], lbyte k[][2]) {
@@ -217,11 +233,11 @@ void K128_Decrypt(lbyte entrada[4], lbyte saida[4], lbyte chave[4]) {
     int i;
     GeraSubChaves(chave, K_lista);
     
-    memcpy(buffer, entrada, 16);
+    /* A ultima transformação T vem primeiro quando decriptografamos */
+    K128_Iteracao_Parte1_INV(entrada, entrada + 2, buffer, buffer + 2, K_lista[4*R], K_lista[4*R + 1]);
+
     for(i = 0; i < R; ++i) {
         K128_Iteracao(buffer, saida, K_lista + 4*i);
         memcpy(buffer, saida, 16);
     }
-    /* Ultima transformação T */
-    K128_Iteracao_Parte1(buffer, buffer + 2, saida, saida + 2, K_lista[4*R], K_lista[4*R + 1]);
 }
