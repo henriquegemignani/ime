@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-void inicializarVetoresFuncPonto();
+void inicializarVetoresFuncPonto(void);
 
 lbyte primeirosNbits(lbyte l, unsigned int N);
 lbyte ultimosNbits(lbyte l, unsigned int N);

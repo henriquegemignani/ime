@@ -12,7 +12,7 @@ void adiciona_valor(byte x, byte y) {
     ponto_log[y] = x;
 }
 
-void inicializarVetoresFuncPonto() {
+void inicializarVetoresFuncPonto(void) {
     unsigned int x, result = 1;
     adiciona_valor(0, 1);
     for(x = 1; x < 256; ++x) {

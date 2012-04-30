@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "K128.h"
 
@@ -22,20 +23,32 @@ void print_lbyte_vector(char* before, lbyte a[], int size) {
     printf("\n");
 }
 
-int main() {
-    int i;
-
-    srand(time(NULL));
-
-    for(i = 0; i < 1000; i++) {
-        lbyte oposto[2], soma[2], a[2];
-        a[0] = rand();
-        a[1] = rand();
-        operacao_oposto_soma64(a, oposto);
-        operacao_soma64(a, oposto, soma);
-        print_lbyte_vector("sum: ", soma, 2);
+void gera_chave_da_senha(char* senha, lbyte k[4]) { /* Chave de 128 bits */
+    byte kB[16];
+    size_t senha_size = strlen(senha);
+    if(senha_size < 16) {
+        /* senha_size é pelo menos 8 pela validação de senha acima. */
+        memcpy(kB, senha, senha_size);
+        memcpy(kB + senha_size, senha, 16 - senha_size);
+    } else {
+        memcpy(kB, senha, 16);
     }
+    k[0] = convert_bytes_to_lbyte(kB);
+    k[1] = convert_bytes_to_lbyte(kB + 4);
+    k[2] = convert_bytes_to_lbyte(kB + 8);
+    k[3] = convert_bytes_to_lbyte(kB + 12);
+}
 
+int main(void) {
+    int i;
+    lbyte k[4];
+    lbyte lK[50][2];
     inicializarVetoresFuncPonto();
+
+    gera_chave_da_senha("Exemplo01", k);
+    GeraSubChaves(k, lK);
+    for(i = 0; i < 50; i++)
+        printf("k[%d] = %x%x\n", i+1, lK[i][0], lK[i][1]);
+
     return 0;
 }
