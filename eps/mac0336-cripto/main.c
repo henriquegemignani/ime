@@ -34,7 +34,7 @@ bool valida_senha(char* senha) {
     return (i >= 8) && (num_digito >= 2) && (num_letra >= 2);
 }
 
-void gera_chave_da_senha(char* senha, lbyte k[4]) { /* Chave de 128 bits */
+void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
     byte kB[16];
     size_t senha_size = strlen(senha);
     if(senha_size < 16) {
@@ -44,61 +44,65 @@ void gera_chave_da_senha(char* senha, lbyte k[4]) { /* Chave de 128 bits */
     } else {
         memcpy(kB, senha, 16);
     }
-    k[0] = convert_bytes_to_lbyte(kB);
-    k[1] = convert_bytes_to_lbyte(kB + 4);
-    k[2] = convert_bytes_to_lbyte(kB + 8);
-    k[3] = convert_bytes_to_lbyte(kB + 12);
+    k->first.bytes[0]  = convert_bytes_to_lbyte(kB);
+    k->first.bytes[1]  = convert_bytes_to_lbyte(kB + 4);
+    k->second.bytes[0] = convert_bytes_to_lbyte(kB + 8);
+    k->second.bytes[1] = convert_bytes_to_lbyte(kB + 12);
 }
 
-unsigned long encriptografa_raw(FILE* entrada, FILE* saida, lbyte k[4]) { /* Chave de 128 bits */
+unsigned long encriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128 bits */
     unsigned long source_size = 0;
     size_t actual_read = 0;
-    lbyte bloco_anterior[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    block128 bloco_anterior = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
     do {
-        lbyte ent[4], sai[4];
-        source_size += actual_read = fread(ent, 1, 16, entrada);
+        block128 ent, sai;
+        source_size += actual_read = fread(&ent, 1, 16, entrada);
 
         /* CFC: XOR com o bloco criptografado anterior. */
-        {   int i;
-            for(i = 0; i < 4; ++i) ent[i] ^= bloco_anterior[i]; }
+        ent.first.bytes[0] ^= bloco_anterior.first.bytes[0];
+        ent.first.bytes[1] ^= bloco_anterior.first.bytes[1];
+        ent.second.bytes[0] ^= bloco_anterior.second.bytes[0];
+        ent.second.bytes[1] ^= bloco_anterior.second.bytes[1];
 
-        K128_Encrypt(ent, sai, k);
+        K128_Encrypt(ent, &sai, k);
 
         if(actual_read < 16) /* Last block. */
-            memset(((byte*)sai) + actual_read, 0xFF, 16 - actual_read);
-        fwrite(sai, 1, 16, saida);
+            memset(((byte*)&sai) + actual_read, 0xFF, 16 - actual_read);
+        fwrite(&sai, 1, 16, saida);
 
         /* Guarda saída para o CFC do próximo bloco. */
-        memcpy(bloco_anterior, sai, 16);
+        memcpy(&bloco_anterior, &sai, 16);
     } while(actual_read == 16);
     return source_size;
 }
 
-void decriptografa_raw(FILE* entrada, FILE* saida, lbyte k[4]) { /* Chave de 128 bits */
+void decriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128 bits */
     unsigned long source_size = 0;
     size_t actual_read = 0;
-    lbyte bloco_anterior[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    block128 bloco_anterior = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
 
     fread(&source_size, 4, 1, entrada);
     while(source_size > 0) {
-        lbyte ent[4], sai[4];
-        actual_read = fread(ent, 1, 16, entrada);
+        block128 ent, sai;
+        actual_read = fread(&ent, 1, 16, entrada);
         if(actual_read < 16) printf("Erro: bloco incompleto!\n");
 
-        K128_Decrypt(ent, sai, k);
+        K128_Decrypt(ent, &sai, k);
 
         /* CFC: XOR com o bloco criptografado anterior. */
-        {   int i;
-            for(i = 0; i < 4; ++i) bloco_anterior[i] ^= sai[i]; }
+        bloco_anterior.first.bytes[0] ^= sai.first.bytes[0];
+        bloco_anterior.first.bytes[1] ^= sai.first.bytes[1];
+        bloco_anterior.second.bytes[0] ^= sai.second.bytes[0];
+        bloco_anterior.second.bytes[1] ^= sai.second.bytes[1];
 
         if(source_size < 16) {
-            fwrite(sai, 1, source_size, saida);
+            fwrite(&sai, 1, source_size, saida);
             source_size = 0;
         } else {
-            fwrite(sai, 1, 16, saida);
+            fwrite(&sai, 1, 16, saida);
 
             /* Guarda crifra para o CFC do próximo bloco. */
-            memcpy(bloco_anterior, ent, 16);
+            memcpy(&bloco_anterior, &ent, 16);
             source_size -= 16;
         }
     }
@@ -108,8 +112,8 @@ void encriptografa(char* nome_entrada, char* nome_saida, char* senha) {
     unsigned long source_size = 0;
     FILE* entrada = fopen(nome_entrada, "rb");
     FILE* saida = fopen(nome_saida, "wb");
-    lbyte k[4]; /* Chave de 128 bits */
-    gera_chave_da_senha(senha, k);
+    block128 k; /* Chave de 128 bits */
+    gera_chave_da_senha(senha, &k);
 
     fwrite(&source_size, 4, 1, saida);
 
@@ -126,8 +130,8 @@ void encriptografa(char* nome_entrada, char* nome_saida, char* senha) {
 void decriptografa(char* nome_entrada, char* nome_saida, char* senha) {
     FILE* entrada = fopen(nome_entrada, "rb");
     FILE* saida = fopen(nome_saida, "wb");
-    lbyte k[4]; /* Chave de 128 bits */
-    gera_chave_da_senha(senha, k);
+    block128 k; /* Chave de 128 bits */
+    gera_chave_da_senha(senha, &k);
 
     printf("Decrypting '%s' to '%s'...\n", nome_entrada, nome_saida);
     decriptografa_raw(entrada, saida, k);
@@ -230,6 +234,6 @@ int main(int argc, char** argv) {
             break;
         default: break;
     }
-    
+    fgetc(stdin);
     return 0;
 }

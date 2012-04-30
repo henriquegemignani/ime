@@ -7,5 +7,14 @@ typedef unsigned char bool;
 #define true 1
 #define false 0
 
+typedef struct Block64 {
+    lbyte bytes[2];
+} block64;
+
+typedef struct Block128bits {
+    block64 first;
+    block64 second;
+} block128;
+
 
 #endif /* TYPES_H_ */

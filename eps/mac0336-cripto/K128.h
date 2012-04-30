@@ -13,32 +13,32 @@ void convert_2lbytes_to_bytes(lbyte l[2], byte b[8]);
 lbyte convert_bytes_to_lbyte(byte b[4]);
 
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com . dentro] */
-void operacao_ponto(lbyte a[2], lbyte b[2], lbyte saida[2]);
-void operacao_ponto_inverso(lbyte xL[2], lbyte k[2], lbyte x[2]);
+void operacao_ponto(block64 a, block64 b, block64 *saida);
+void operacao_ponto_inverso(block64 xL, block64 k, block64 *x);
 
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */
-void operacao_soma64(lbyte a[2], lbyte b[2], lbyte saida[2]);
+void operacao_soma64(block64 a, block64 b, block64 *saida);
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com + dentro] */
-void operacao_xor(lbyte a[2], lbyte b[2], lbyte saida[2]);
+void operacao_xor(block64 a, block64 b, block64 *saida);
 /* B: inteiro, a, saida: 64 bits (8 bytes) [no enunciado: <<] */
-void operacao_rotacao(lbyte a[2], unsigned int b, lbyte s[2]);
+void operacao_rotacao(block64 a, unsigned int b, block64 *saida);
 /* a, saida: 64 bits (8 bytes) */
-void operacao_oposto_soma64(lbyte a[2], lbyte saida[2]);
+void operacao_oposto_soma64(block64 a, block64 *saida);
 
 /* a, b, saida: 64 bits (8 bytes) */
-void operacao_rotacao_por_lbyte(lbyte a[2], lbyte b[2], lbyte s[2]);
+void operacao_rotacao_por_lbyte(block64 a, block64 b, block64 *saida);
 
-void K128_Iteracao_Parte1(lbyte Xa[2], lbyte Xb[2], lbyte XaL[2], lbyte XbL[2], lbyte kA[2], lbyte kB[2]);
-void K128_Iteracao_Parte2(lbyte Xe[2], lbyte Xf[2], lbyte XeL[2], lbyte XfL[2], lbyte kE[2], lbyte kF[2]);
-void K128_Iteracao(lbyte entrada[2], lbyte saida[2], lbyte chaves[][2]);
+void K128_Iteracao_Parte1(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, block64 kA, block64 kB);
+void K128_Iteracao_Parte2(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, block64 kE, block64 kF);
+void K128_Iteracao(block128 entrada, block128 *saida, block64 chaves[]);
 
-void K128_Iteracao_Parte1_INV(lbyte Xa[2], lbyte Xb[2], lbyte XaL[2], lbyte XbL[2], lbyte kA[2], lbyte kB[2]);
-void K128_Iteracao_Parte2_INV(lbyte Xe[2], lbyte Xf[2], lbyte XeL[2], lbyte XfL[2], lbyte kE[2], lbyte kF[2]);
-void K128_Iteracao_INV(lbyte entrada[2], lbyte saida[2], lbyte chaves[][2]);
+void K128_Iteracao_Parte1_INV(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, block64 kA, block64 kB);
+void K128_Iteracao_Parte2_INV(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, block64 kE, block64 kF);
+void K128_Iteracao_INV(block128 entrada, block128 *saida, block64 chaves[]);
 
-void GeraSubChaves(lbyte K[4], lbyte K_lista[][2]);
-void K128_Encrypt(lbyte entrada[4], lbyte saida[4], lbyte chave[4]);
-void K128_Decrypt(lbyte entrada[4], lbyte saida[4], lbyte chave[4]);
+void GeraSubChaves(block128 K, block64 K_lista[]);
+void K128_Encrypt(block128 entrada, block128 *saida, block128 chave);
+void K128_Decrypt(block128 entrada, block128 *saida, block128 chave);
 
 
 #endif /* K128_H_ */
