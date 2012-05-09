@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+void copy_block64(block64 source, block64 *target);
+
 void inicializarVetoresFuncPonto(void);
 
 lbyte primeirosNbits(lbyte l, unsigned int N);

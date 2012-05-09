@@ -20,7 +20,6 @@ void print_lbyte_vector(char* before, lbyte a[], int size) {
     printf(before);
     for(i = 0; i < size; ++i)
         print_lbyte_as_binary(a[i]);
-    printf("\n");
 }
 
 void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
@@ -33,22 +32,49 @@ void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
     } else {
         memcpy(kB, senha, 16);
     }
-    k->first.bytes[0]  = convert_bytes_to_lbyte(kB);
-    k->first.bytes[1]  = convert_bytes_to_lbyte(kB + 4);
-    k->second.bytes[0] = convert_bytes_to_lbyte(kB + 8);
-    k->second.bytes[1] = convert_bytes_to_lbyte(kB + 12);
+    k->esquerda.bytes[0]  = convert_bytes_to_lbyte(kB);
+    k->esquerda.bytes[1]  = convert_bytes_to_lbyte(kB + 4);
+    k->direita.bytes[0] = convert_bytes_to_lbyte(kB + 8);
+    k->direita.bytes[1] = convert_bytes_to_lbyte(kB + 12);
+}
+
+void init(void) {
+    srand(time(NULL));
+    inicializarVetoresFuncPonto();
+}
+
+void imprime_chaves(void) {
+    block128 k;
+    block64 lK[50];
+    gera_chave_da_senha("Exemplo01", &k);
+    GeraSubChaves(k, lK);
+    {   int i;
+        for(i = 0; i < 50; i++)
+            printf("k[%d] = %x%x\n", i+1, lK[i].bytes[0], lK[i].bytes[1]); }
 }
 
 int main(void) {
-    int i;
-    block128 k;
-    block64 lK[50];
-    inicializarVetoresFuncPonto();
+    block64 A, B;
 
-    gera_chave_da_senha("Exemplo01", &k);
-    GeraSubChaves(k, lK);
-    for(i = 0; i < 50; i++)
-        printf("k[%d] = %x%x\n", i+1, lK[i].bytes[0], lK[i].bytes[1]);
+    A.bytes[0] = rand();
+    A.bytes[1] = rand();
+    B.bytes[0] = rand();
+    B.bytes[1] = rand();
+    
+    init();
+
+    print_lbyte_vector("", A.bytes, 2);
+    printf("\n");
+    while(fgetc(stdin) != 'q') {
+        static block64 one = { 0x00000000, 0x00000001 };
+        block64 C;
+        operacao_soma64(B, one, &C);
+        copy_block64(C, &B);
+
+        operacao_rotacao_por_lbyte(A, B, &C);
+        print_lbyte_vector("", C.bytes, 2);
+    }
+    /* imprime_chaves(); */
 
     return 0;
 }

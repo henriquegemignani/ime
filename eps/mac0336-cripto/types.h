@@ -12,8 +12,8 @@ typedef struct Block64 {
 } block64;
 
 typedef struct Block128bits {
-    block64 first;
-    block64 second;
+    block64 esquerda;
+    block64 direita;
 } block128;
 
 
