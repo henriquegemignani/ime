@@ -1,5 +1,5 @@
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include "K128.h"
 
 #define R 12
@@ -271,4 +271,18 @@ void K128_Decrypt(block128 entrada, block128 *saida, block128 chave) {
         K128_Iteracao_INV(buffer, saida, K_lista + 4*i);
         memcpy(&buffer, saida, 16);
     }
+}
+
+void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
+    byte kB[16];
+    size_t senha_size = strlen(senha);
+    if(senha_size < 16) {
+        /* senha_size é pelo menos 8 pela validação de senha acima. */
+        memcpy(kB, senha, senha_size);
+        memcpy(kB + senha_size, senha, 16 - senha_size);
+    } else {
+        memcpy(kB, senha, 16);
+    }
+    k->esquerda  = convert_bytes_to_block64(kB);
+    k->direita = convert_bytes_to_block64(kB + 8);
 }

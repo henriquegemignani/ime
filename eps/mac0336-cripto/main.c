@@ -23,6 +23,7 @@ int trata_modo(char* input) {
         default: return -1;
     }
 }
+
 bool valida_senha(char* senha) {
     int num_digito = 0, num_letra = 0, i;
     for(i = 0; senha[i] != '\0'; ++i) {
@@ -32,20 +33,6 @@ bool valida_senha(char* senha) {
             ++num_digito;
     }
     return (i >= 8) && (num_digito >= 2) && (num_letra >= 2);
-}
-
-void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
-    byte kB[16];
-    size_t senha_size = strlen(senha);
-    if(senha_size < 16) {
-        /* senha_size é pelo menos 8 pela validação de senha acima. */
-        memcpy(kB, senha, senha_size);
-        memcpy(kB + senha_size, senha, 16 - senha_size);
-    } else {
-        memcpy(kB, senha, 16);
-    }
-    k->esquerda  = convert_bytes_to_block64(kB);
-    k->direita = convert_bytes_to_block64(kB + 8);
 }
 
 unsigned long encriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128 bits */

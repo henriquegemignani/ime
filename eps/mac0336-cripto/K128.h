@@ -41,5 +41,6 @@ void GeraSubChaves(block128 K, block64 K_lista[]);
 void K128_Encrypt(block128 entrada, block128 *saida, block128 chave);
 void K128_Decrypt(block128 entrada, block128 *saida, block128 chave);
 
+void gera_chave_da_senha(char* senha, block128 *k);
 
 #endif /* K128_H_ */
