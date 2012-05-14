@@ -44,25 +44,21 @@ void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
     } else {
         memcpy(kB, senha, 16);
     }
-    k->esquerda.bytes[0]  = convert_bytes_to_lbyte(kB);
-    k->esquerda.bytes[1]  = convert_bytes_to_lbyte(kB + 4);
-    k->direita.bytes[0] = convert_bytes_to_lbyte(kB + 8);
-    k->direita.bytes[1] = convert_bytes_to_lbyte(kB + 12);
+    k->esquerda  = convert_bytes_to_block64(kB);
+    k->direita = convert_bytes_to_block64(kB + 8);
 }
 
 unsigned long encriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128 bits */
     unsigned long source_size = 0;
     size_t actual_read = 0;
-    block128 bloco_anterior = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    block128 bloco_anterior = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
     do {
         block128 ent, sai;
         source_size += actual_read = fread(&ent, 1, 16, entrada);
 
         /* CFC: XOR com o bloco criptografado anterior. */
-        ent.esquerda.bytes[0] ^= bloco_anterior.esquerda.bytes[0];
-        ent.esquerda.bytes[1] ^= bloco_anterior.esquerda.bytes[1];
-        ent.direita.bytes[0] ^= bloco_anterior.direita.bytes[0];
-        ent.direita.bytes[1] ^= bloco_anterior.direita.bytes[1];
+        ent.esquerda ^= bloco_anterior.esquerda;
+        ent.direita  ^= bloco_anterior.direita;
 
         K128_Encrypt(ent, &sai, k);
 
@@ -79,7 +75,7 @@ unsigned long encriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Cha
 void decriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128 bits */
     unsigned long source_size = 0;
     size_t actual_read = 0;
-    block128 bloco_anterior = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    block128 bloco_anterior = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
 
     fread(&source_size, 4, 1, entrada);
     while(source_size > 0) {
@@ -90,10 +86,8 @@ void decriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128
         K128_Decrypt(ent, &sai, k);
 
         /* CFC: XOR com o bloco criptografado anterior. */
-        bloco_anterior.esquerda.bytes[0] ^= sai.esquerda.bytes[0];
-        bloco_anterior.esquerda.bytes[1] ^= sai.esquerda.bytes[1];
-        bloco_anterior.direita.bytes[0] ^= sai.direita.bytes[0];
-        bloco_anterior.direita.bytes[1] ^= sai.direita.bytes[1];
+        bloco_anterior.esquerda ^= sai.esquerda;
+        bloco_anterior.direita  ^= sai.direita;
 
         if(source_size < 16) {
             fwrite(&sai, 1, source_size, saida);

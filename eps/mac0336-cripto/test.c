@@ -4,22 +4,16 @@
 #include <time.h>
 #include "K128.h"
 
-void print_lbyte_as_binary(lbyte l) {
-    char buffer[33];
+void print_block64_as_binary(char* before, block64 l) {
+    char buffer[65];
     int i;
-    buffer[32] = '\0';
-    for(i = 31; i >= 0; --i) {
+    buffer[64] = '\0';
+    for(i = 63; i >= 0; --i) {
         buffer[i] = ((l & 1) != 0) ? '1' : '0';
         l >>= 1;
     }
-    printf("%s", buffer);
-}
-
-void print_lbyte_vector(char* before, lbyte a[], int size) {
-    int i;
     printf(before);
-    for(i = 0; i < size; ++i)
-        print_lbyte_as_binary(a[i]);
+    printf("%s", buffer);
 }
 
 void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
@@ -32,10 +26,8 @@ void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
     } else {
         memcpy(kB, senha, 16);
     }
-    k->esquerda.bytes[0]  = convert_bytes_to_lbyte(kB);
-    k->esquerda.bytes[1]  = convert_bytes_to_lbyte(kB + 4);
-    k->direita.bytes[0] = convert_bytes_to_lbyte(kB + 8);
-    k->direita.bytes[1] = convert_bytes_to_lbyte(kB + 12);
+    k->esquerda  = convert_bytes_to_block64(kB);
+    k->direita = convert_bytes_to_block64(kB + 8);
 }
 
 void init(void) {
@@ -44,37 +36,35 @@ void init(void) {
 }
 
 void imprime_chaves(void) {
+    int i;
     block128 k;
     block64 lK[50];
     gera_chave_da_senha("Exemplo01", &k);
     GeraSubChaves(k, lK);
-    {   int i;
-        for(i = 0; i < 50; i++)
-            printf("k[%d] = %x%x\n", i+1, lK[i].bytes[0], lK[i].bytes[1]); }
+    puts("Exemplo01");
+    for(i = 0; i < 50; i++)
+        printf("k[%d] = %016llx\n", i+1, lK[i]);
 }
 
 int main(void) {
     block64 A, B;
 
-    A.bytes[0] = rand();
-    A.bytes[1] = rand();
-    B.bytes[0] = rand();
-    B.bytes[1] = rand();
+    A = rand();
+    B = rand();
     
     init();
 
-    print_lbyte_vector("", A.bytes, 2);
+    /*print_block64_as_binary("", A);
     printf("\n");
     while(fgetc(stdin) != 'q') {
-        static block64 one = { 0x00000000, 0x00000001 };
         block64 C;
-        operacao_soma64(B, one, &C);
-        copy_block64(C, &B);
+        operacao_soma64(B, 1, &C);
+        B = C;
 
         operacao_rotacao_por_lbyte(A, B, &C);
-        print_lbyte_vector("", C.bytes, 2);
-    }
-    /* imprime_chaves(); */
+        print_block64_as_binary("", C);
+    }*/
+    imprime_chaves();
 
     return 0;
 }

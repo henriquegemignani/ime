@@ -3,8 +3,6 @@
 
 #include "types.h"
 
-void copy_block64(block64 source, block64 *target);
-
 void inicializarVetoresFuncPonto(void);
 
 lbyte primeirosNbits(lbyte l, unsigned int N);
@@ -13,6 +11,7 @@ lbyte ultimosNbits(lbyte l, unsigned int N);
 void convert_lbyte_to_bytes(lbyte l, byte b[4]);
 void convert_2lbytes_to_bytes(lbyte l[2], byte b[8]);
 lbyte convert_bytes_to_lbyte(byte b[4]);
+block64 convert_bytes_to_block64(byte b[8]);
 
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com . dentro] */
 void operacao_ponto(block64 a, block64 b, block64 *saida);

@@ -5,12 +5,6 @@
 #define R 12
 #define NUM_KEYS(R) (4*(R)+2)
 
-void copy_block64(block64 source, block64 *target) {
-    target->bytes[0] = source.bytes[0];
-    target->bytes[1] = source.bytes[1];
-}
-
-
 static byte ponto_exp[256];
 static byte ponto_log[256];
 
@@ -29,6 +23,10 @@ void inicializarVetoresFuncPonto(void) {
         else
             adiciona_valor((byte) x, (byte) result);
     }
+}
+
+void imprimeValoresPonto(void) {
+
 }
 
 
@@ -51,9 +49,15 @@ void convert_2lbytes_to_bytes(lbyte l[2], byte b[8]) {
     convert_lbyte_to_bytes(l[0], b);
     convert_lbyte_to_bytes(l[1], b + 4);
 }
-void convert_block64_to_bytes(block64 block, byte b[8]) {
-    convert_lbyte_to_bytes(block.bytes[0], b);
-    convert_lbyte_to_bytes(block.bytes[1], b + 4);  
+void convert_block64_to_bytes(block64 l, byte b[8]) {
+    b[0] = (byte)((l & 0xFF00000000000000) >> 56);
+    b[1] = (byte)((l & 0x00FF000000000000) >> 48);
+    b[2] = (byte)((l & 0x0000FF0000000000) >> 40);
+    b[3] = (byte)((l & 0x000000FF00000000) >> 32);
+    b[4] = (byte)((l & 0x00000000FF000000) >> 24);
+    b[5] = (byte)((l & 0x0000000000FF0000) >> 16);
+    b[6] = (byte)((l & 0x000000000000FF00) >> 8);
+    b[7] = (byte)((l & 0x00000000000000FF));
 }
 
 lbyte convert_bytes_to_lbyte(byte b[4]) {
@@ -65,77 +69,66 @@ lbyte convert_bytes_to_lbyte(byte b[4]) {
     return result;
 }
 
+block64 convert_bytes_to_block64(byte b[8]) {
+    block64 result = 0;
+    result |= ((block64)(b[0]) << 56);
+    result |= ((block64)(b[1]) << 48);
+    result |= ((block64)(b[2]) << 40);
+    result |= ((block64)(b[3]) << 32);
+    result |= ((block64)(b[4]) << 24);
+    result |= ((block64)(b[5]) << 16);
+    result |= ((block64)(b[6]) <<  8);
+    result |= ((block64)(b[7])      );
+    return result;
+}
+
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com . dentro] */
 void operacao_ponto(block64 a, block64 b, block64 *saida) {
     byte aB[8], bB[8];
     int i;
-    convert_2lbytes_to_bytes(a.bytes, aB);
-    convert_2lbytes_to_bytes(b.bytes, bB);
+    convert_block64_to_bytes(a, aB);
+    convert_block64_to_bytes(b, bB);
     for(i = 0; i < 8; ++i) {
         aB[i] = ponto_exp[aB[i]];
         bB[i] = ponto_exp[bB[i]];
     }
-    saida->bytes[0] = convert_bytes_to_lbyte(aB) ^ convert_bytes_to_lbyte(bB);
-    saida->bytes[1] = convert_bytes_to_lbyte(aB + 4) ^ convert_bytes_to_lbyte(bB + 4);
+    *saida = convert_bytes_to_block64(aB) ^ convert_bytes_to_block64(bB);
 }
 void operacao_ponto_inverso(block64 xL, block64 k, block64 *x) {
     /* X' = X (*) K -> X' = f(X) ^ f(K) -> X' ^ f(K) = f(X) -> 
        -> fINV(x' ^ f(K)) = fINV(f(X)) = X. */
     byte xLB[8], kB[8];
     int i;
-    convert_2lbytes_to_bytes(xL.bytes, xLB);
-    convert_2lbytes_to_bytes(k.bytes, kB);
+    convert_block64_to_bytes(xL, xLB);
+    convert_block64_to_bytes(k, kB);
     for(i = 0; i < 8; ++i)
         xLB[i] = ponto_log[xLB[i] ^ ponto_exp[kB[i]]];
-    x->bytes[0] = convert_bytes_to_lbyte(xLB);
-    x->bytes[1] = convert_bytes_to_lbyte(xLB + 4);
+    *x = convert_bytes_to_block64(xLB);
 }
 
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: quadrado com + dentro] */
 void operacao_soma64(block64 a, block64 b, block64 *saida) {
-    saida->bytes[1] = a.bytes[1] + b.bytes[1];
-    saida->bytes[0] = a.bytes[0] + b.bytes[0] + ((saida->bytes[1] < a.bytes[1]) || (saida->bytes[1] < b.bytes[1]));
+    *saida = a + b;
 }
 /* a, b, saida: 64 bits (8 bytes) [no enunciado: circulo com + dentro] */
 void operacao_xor(block64 a, block64 b, block64 *saida) {
-    saida->bytes[0] = a.bytes[0] ^ b.bytes[0];
-    saida->bytes[1] = a.bytes[1] ^ b.bytes[1];
+    *saida = a ^ b;
 }
 /* B: inteiro, a, saida: 64 bits (8 bytes) [no enunciado: <<] */
 void operacao_rotacao(block64 a, unsigned int b, block64 *s) {
-    if(b >= 64) {
-        operacao_rotacao(a, b % 64, s);
-    } else if(b == 0) {
-        s->bytes[0] = a.bytes[0];
-        s->bytes[1] = a.bytes[1];
-    } else if(b == 32) {
-        s->bytes[0] = a.bytes[1];
-        s->bytes[1] = a.bytes[0];
-    } else if(b < 32) {
-        s->bytes[0]  = a.bytes[0] << b;
-        s->bytes[0] += primeirosNbits(a.bytes[1], b);
-        s->bytes[1]  = a.bytes[1] << b;
-        s->bytes[1] += primeirosNbits(a.bytes[0], b);
-    } else /* if(b > 32) */ { 
-        int bL = b - 32;
-        s->bytes[0]  = a.bytes[1] << bL;
-        s->bytes[0] += primeirosNbits(a.bytes[0], bL);
-        s->bytes[1]  =   ultimosNbits(a.bytes[0], 64 - b) << bL;
-        s->bytes[1] += primeirosNbits(a.bytes[1], bL);
-    }
+    if(b >= 64) b = b % 64;
+    *s = (a << b) | (a >> (64 - b));
 }
 
 /* a, b, saida: 64 bits (8 bytes) */
 void operacao_rotacao_por_lbyte(block64 a, block64 b, block64 *s) {
     /* x << y == x << (y mod 64) */
     /* Os ultimos 6 bits de um número representam o resto da divisão por 64. */
-    operacao_rotacao(a, b.bytes[1] & 0x3F, s);
+    operacao_rotacao(a, b & 0x3F, s);
 }
 
-void operacao_oposto_soma64(block64 a, block64 *saida) {
-    saida->bytes[0] = ~a.bytes[0];
-    saida->bytes[1] = ~a.bytes[1] + 1;
-    if(saida->bytes[1] == 0) saida->bytes[0]++;
+void operacao_oposto_soma64(block64 a, block64 *s) {
+    *s = -a;
 }
 
 
@@ -204,20 +197,20 @@ void GeraSubChaves(block128 K, block64 k_out[]) {
 
     {
         int j;
-        static block64 magic_num1 = { 0x9E3779B9, 0x7F4A7C15 }; /* 0x9e3779b97f4a7c15 */
-        static block64 magic_num2 = { 0x8AED2A6B, 0xB7E15162 }; /* 0x8aed2a6bb7e15162 */
-        static block64 magic_num3 = { 0x7C159E37, 0x79B97F4A }; /* 0x7c159e3779b97f4a */
+        static block64 magic_num1 = 0x9E3779B97F4A7C15; /* 0x9e3779b97f4a7c15 */
+        static block64 magic_num2 = 0x8AED2A6BB7E15162; /* 0x8aed2a6bb7e15162 */
+        static block64 magic_num3 = 0x7C159E3779B97F4A; /* 0x7c159e3779b97f4a */
 
         /* Passo 1. */
-        copy_block64(K.esquerda, &L[0]);
-        copy_block64(K.direita,  &L[1]);
+        L[0] = K.esquerda;
+        L[1] = K.direita;
     
         /* Passo 2. */
         for(j = 2; j <= NUM_KEYS(R); ++j)
             operacao_soma64(L[j-1], magic_num1, &L[j]);
         
         /* Passo 3. */
-        copy_block64(magic_num2, &k[0]);
+        k[0] = magic_num2;
     
         /* Passo 4. */
         for(j = 1; j <= NUM_KEYS(R); ++j)
@@ -226,8 +219,8 @@ void GeraSubChaves(block128 K, block64 k_out[]) {
     {
         /* Passo 5. */
         int i = 0, j = 0;
-        block64 A = { 0x00000000, 0x00000000 };
-        block64 B = { 0x00000000, 0x00000000 };
+        block64 A = 0;
+        block64 B = 0;
     
         /* Passo 6. */
         int s;
@@ -237,18 +230,16 @@ void GeraSubChaves(block128 K, block64 k_out[]) {
             operacao_soma64(k[i], A, &aux1);
             operacao_soma64(aux1, B, &aux2);
             operacao_rotacao(aux2, 3, &k[i]);
-            copy_block64(k[i], &A);
-            i++;
+            A = k[i++];
         
             operacao_soma64(A, B, &aux1); /* aux1 = A [+] B */
-            operacao_soma64(L[i], aux1, &aux2); /* aux2 = Li [+] A [+] B */
-            operacao_rotacao_por_lbyte(aux2, aux1, &L[i]); /* Li = aux2 << aux1 = (Li [+] A [+] B) << (A [+] B) */
-            copy_block64(L[i], &B);
-            j++;
+            operacao_soma64(L[j], aux1, &aux2); /* aux2 = Li [+] A [+] B */
+            operacao_rotacao_por_lbyte(aux2, aux1, &L[j]); /* Li = aux2 << aux1 = (Li [+] A [+] B) << (A [+] B) */
+            B = L[j++];
         }
 
         for(i = 0; i < NUM_KEYS(R); ++i)
-            copy_block64(k[i + 1], &k_out[i]);
+            k_out[i] = k[i + 1];
     }
 }
 
