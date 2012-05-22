@@ -25,11 +25,6 @@ void inicializarVetoresFuncPonto(void) {
     }
 }
 
-void imprimeValoresPonto(void) {
-
-}
-
-
 lbyte primeirosNbits(lbyte l, unsigned int N) {
     lbyte mask = ((0x1uL << N) - 1) << (32 - N);
     return (l & mask) >> (32 - N);
@@ -131,6 +126,11 @@ void operacao_oposto_soma64(block64 a, block64 *s) {
     *s = -a;
 }
 
+void copy_block128(block128 a, block128* s) {
+    s->esquerda = a.esquerda;
+    s->direita = a.direita;
+}
+
 
 void K128_Iteracao_Parte1(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, block64 kA, block64 kB) {
     operacao_ponto(Xa, kA, XaL);
@@ -139,20 +139,22 @@ void K128_Iteracao_Parte1(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, bl
 
 void K128_Iteracao_Parte2(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, block64 kE, block64 kF) {
     block64 Y1, Y2, Z;
-    block64 aux1, aux2;
-    
+    block64 A, aux;
+
+    /* Calculando Y1 = Xe (+) Xf */
     operacao_xor(Xe, Xf, &Y1);
     
-    /* Calculando Y2 = [(kE (*) Y1) [+] Y1] (*) kF */
-    operacao_ponto(kE, Y1, &aux1);  /* aux1 = (kE (*) Y1) */
-    operacao_soma64(aux1, Y1, &aux2); /* aux2 = aux1 [+] Z1 = (kE (*) Y1) [+] Z1 */
-    operacao_ponto(aux2, kF, &Y2);
+    /* Simplificando: A = (kE (*) Y1) */
+    operacao_ponto(kE, Y1, &A);
+
+    /* Calculando Y2 = [A [+] Y1] (*) kF */
+    operacao_soma64(A, Y1, &aux); /* aux = A [+] Y1 */
+    operacao_ponto(aux, kF, &Y2);
     
-    /* Calculando Z = (kE (*) Y1) [+] Y2 */
-    operacao_ponto(kE, Y1, &aux1);
-    operacao_soma64(aux1, Y2, &Z);
+    /* Calculando Z = A [+] Y2 */
+    operacao_soma64(A, Y2, &Z);
     
-    /* Calculando XeL = Xe (+) Z; XfL = Xf [+] Z */
+    /* Calculando XeL = Xe (+) Z; XfL = Xf (+) Z */
     operacao_xor(Xe, Z, XeL);
     operacao_xor(Xf, Z, XfL);
 }
@@ -160,12 +162,9 @@ void K128_Iteracao_Parte2(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, bl
 /* entrada, saida e chave: 128 bits (16 bytes) */
 void K128_Iteracao(block128 entrada, block128 *saida, block64 chaves[]) {
     block128 Xbuffer;
-    K128_Iteracao_Parte1(entrada.esquerda, entrada.direita, &(Xbuffer.esquerda), &(Xbuffer.direita), chaves[0], chaves[1]); /* k1 e k2 */
-    K128_Iteracao_Parte2(Xbuffer.esquerda, Xbuffer.direita, &(saida->esquerda),  &(saida->direita) , chaves[2], chaves[2]); /* k3 e k4 */
-}
 
-void K128_Iteracao_Parte2_INV(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, block64 kE, block64 kF) {
-    K128_Iteracao_Parte2(Xe, Xf, XeL, XfL, kE, kF);
+    K128_Iteracao_Parte1(entrada.esquerda, entrada.direita, &(Xbuffer.esquerda), &(Xbuffer.direita), chaves[0], chaves[1]); /* k1 e k2 */
+    K128_Iteracao_Parte2(Xbuffer.esquerda, Xbuffer.direita, &(saida->esquerda),  &(saida->direita) , chaves[2], chaves[3]); /* k3 e k4 */
 }
 
 void K128_Iteracao_Parte1_INV(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, block64 kA, block64 kB) {
@@ -181,16 +180,9 @@ void K128_Iteracao_Parte1_INV(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL
 
 void K128_Iteracao_INV(block128 entrada, block128 *saida, block64 chaves[]) {
     block128 Xbuffer;
+
     K128_Iteracao_Parte2    (entrada.esquerda, entrada.direita, &(Xbuffer.esquerda), &(Xbuffer.direita), chaves[2], chaves[3]); /* k1 e k2 */
     K128_Iteracao_Parte1_INV(Xbuffer.esquerda, Xbuffer.direita, &(saida->esquerda),  &(saida->direita) , chaves[0], chaves[1]); /* k3 e k4 */
-}
-
-void rawprint_bloco64(block64 block) {
-    byte bytes[8];
-    int i;
-    convert_block64_to_bytes(block, bytes);
-    for(i = 0; i < 8; i++)
-        printf("%x", bytes[i]);
 }
 
 void GeraSubChaves(block128 K, block64 k_out[]) {
@@ -246,18 +238,16 @@ void GeraSubChaves(block128 K, block64 k_out[]) {
 }
 
 void K128_Encrypt(block128 entrada, block128 *saida, block128 chave) {
-    block128 buffer;
     block64 K_lista[NUM_KEYS(R)];
     int i;
     GeraSubChaves(chave, K_lista);
     
-    memcpy(&buffer, &entrada, 16);
     for(i = 0; i < R; ++i) {
-        K128_Iteracao(buffer, saida, K_lista + 4*i);
-        memcpy(&buffer, saida, 16);
+        K128_Iteracao(entrada, saida, K_lista + 4*i);
+        copy_block128(*saida, &entrada);
     }
     /* Ultima transformação T */
-    K128_Iteracao_Parte1(buffer.esquerda, buffer.direita, &(saida->esquerda), &(saida->direita), K_lista[4*R], K_lista[4*R + 1]);
+    K128_Iteracao_Parte1(entrada.esquerda, entrada.direita, &(saida->esquerda), &(saida->direita), K_lista[4*R], K_lista[4*R + 1]);
 }
 
 void K128_Decrypt(block128 entrada, block128 *saida, block128 chave) {
@@ -271,7 +261,7 @@ void K128_Decrypt(block128 entrada, block128 *saida, block128 chave) {
 
     for(i = R - 1; i >= 0; --i) {
         K128_Iteracao_INV(buffer, saida, K_lista + 4*i);
-        memcpy(&buffer, saida, 16);
+        copy_block128(*saida, &buffer);
     }
 }
 

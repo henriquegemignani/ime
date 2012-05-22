@@ -47,7 +47,7 @@ unsigned long encriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Cha
         block128 ent, sai;
         source_size += actual_read = fread(&ent, 1, 16, entrada);
 
-        /* CFC: XOR com o bloco criptografado anterior. */
+        /* CBC: XOR com o bloco criptografado anterior. */
         ent.esquerda ^= bloco_anterior.esquerda;
         ent.direita  ^= bloco_anterior.direita;
 
@@ -57,8 +57,10 @@ unsigned long encriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Cha
             memset(((byte*)&sai) + actual_read, 0xFF, 16 - actual_read);
         fwrite(&sai, 1, 16, saida);
 
-        /* Guarda saída para o CFC do próximo bloco. */
-        memcpy(&bloco_anterior, &sai, 16);
+        /* Guarda saída para o CBC do próximo bloco. */
+        copy_block128(sai, &bloco_anterior);
+
+
     } while(actual_read == 16);
     return source_size;
 }
@@ -76,9 +78,9 @@ void decriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128
 
         K128_Decrypt(ent, &sai, k);
 
-        /* CFC: XOR com o bloco criptografado anterior. */
-        bloco_anterior.esquerda ^= sai.esquerda;
-        bloco_anterior.direita  ^= sai.direita;
+        /* CBC: XOR com o bloco criptografado anterior. */
+        sai.esquerda ^= bloco_anterior.esquerda;
+        sai.direita  ^= bloco_anterior.direita;
 
         if(source_size < 16) {
             fwrite(&sai, 1, source_size, saida);
@@ -86,8 +88,8 @@ void decriptografa_raw(FILE* entrada, FILE* saida, block128 k) { /* Chave de 128
         } else {
             fwrite(&sai, 1, 16, saida);
 
-            /* Guarda crifra para o CFC do próximo bloco. */
-            memcpy(&bloco_anterior, &ent, 16);
+            /* Guarda crifra para o CBC do próximo bloco. */
+            copy_block128(ent, &bloco_anterior);
             source_size -= 16;
         }
     }

@@ -29,12 +29,13 @@ void operacao_oposto_soma64(block64 a, block64 *saida);
 /* a, b, saida: 64 bits (8 bytes) */
 void operacao_rotacao_por_lbyte(block64 a, block64 b, block64 *saida);
 
+void copy_block128(block128 a, block128* s);
+
 void K128_Iteracao_Parte1(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, block64 kA, block64 kB);
 void K128_Iteracao_Parte2(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, block64 kE, block64 kF);
 void K128_Iteracao(block128 entrada, block128 *saida, block64 chaves[]);
 
 void K128_Iteracao_Parte1_INV(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, block64 kA, block64 kB);
-void K128_Iteracao_Parte2_INV(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, block64 kE, block64 kF);
 void K128_Iteracao_INV(block128 entrada, block128 *saida, block64 chaves[]);
 
 void GeraSubChaves(block128 K, block64 K_lista[]);

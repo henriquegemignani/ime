@@ -1,0 +1,30 @@
+Nome Completo: Henrique Gemignani Passos Lima
+NUSP: 6879634
+
+Arquivos:
+* main.c
+Trata argumentos de linha de comando, le o arquivo fonte e escreve o arquivo destino, além de realizar o CBC.
+
+* K128.c
+Possui a lógica toda do K128.
+
+* K128.h
+Cabeçalho das funções definidas no K128.c
+
+* types.h
+Tipos usados pelo K128.
+
+* CMakeLists.txt
+Arquivo de configuração do CMake.
+
+Como usar:
+Da mesma forma como descrito no enunciado, com os mesmos argumentos.
+
+Computador/compilador utilizado:
+AMD64 com Windows 7, compilando usando o MSVC. Também foi usado o MinGW.
+
+Como compilar:
+$ cmake .
+$ make
+
+É necessário ter o cmake instalado. Caso não tenha, "gcc main.c K128.c" deve bastar.
