@@ -127,12 +127,85 @@ void decriptografa(char* nome_entrada, char* nome_saida, char* senha) {
     fclose(saida);
 }
 
+void pega_1024bit(char* nome_entrada, block128 bits[]) {
+    FILE* entrada = fopen(nome_entrada, "rb");
+    fread(bits, 8, 16, entrada);
+    fclose(entrada);
+}
+
+uint32_t min(uint32_t a, uint32_t b) { return a > b ? b : a; }
+uint32_t max(uint32_t a, uint32_t b) { return a > b ? a : b; }
+
+void inverte_bit(block128 val[], int bit) {
+    int i = bit / 128;
+    bit = bit % 128;
+    if(bit > 64)
+        val[i].esquerda ^= 1LL << (bit - 64);
+    else
+        val[i].direita ^= 1LL << bit;
+}
+
+void modo2_inverte_bit(block128 val[], int bit) {
+    inverte_bit(val, bit);
+    if(bit + 8 < 1024) inverte_bit(val, bit + 8);
+}
+
+uint32_t calcula_distancia_de_hamming(block128 a, block128 b) {
+    block64 d;
+    uint32_t result = 0;
+    
+    for(d = a.esquerda ^ b.esquerda; d > 0; d >>= 1)
+        if(d & 1) result++;
+
+    for(d = a.direita ^ b.direita; d > 0; d >>= 1)
+        if(d & 1) result++;
+
+    return result;
+}
+
+void analise(char* nome_entrada, char* senha, void (*adultera)(block128*, int)  ) {
+    int j;
+    block128 chave, VetEntra[8], VetEntraC[8];
+    uint32_t SomaH[8], MinH[8], MaxH[8];
+    gera_chave_da_senha(senha, &chave);
+    
+    for(j = 0; j < 8; ++j) {
+        SomaH[j] = MaxH[j] = 0;
+        MinH[j] = (uint32_t)(-1); // MAX INT
+    }
+    
+    pega_1024bit(nome_entrada, VetEntra);
+    K128CBC_Encrypt(VetEntra, VetEntraC, chave, 8);
+    
+    for(j = 0; j < 1024; j++) {
+        block128 VetAlter[8], VetAlterC[8];
+        int k;
+
+        for(k = 0; k < 8; ++k)
+            copy_block128(VetEntra[k], &VetAlter[k]);
+        adultera(VetAlter, j);
+        K128CBC_Encrypt(VetAlter, VetAlterC, chave, 8);
+
+        for(k = 0; k < 8; ++k) {
+            int H = calcula_distancia_de_hamming(VetEntraC[k], VetAlterC[k]);
+            SomaH[k] += H;
+            MaxH[k] = max(MaxH[k], H);
+            MinH[k] = min(MinH[k], H);
+        }
+    }
+    
+    puts("Bloco |   Maximo   |   Minimo   |    Media");
+    for(j = 0; j < 8; ++j)
+        printf("    %d | %.10u | %.10u | %.10u\n", j, MaxH[j], MinH[j], SomaH[j] / 8);
+}
+
 int main(int argc, char** argv) {
     int modo;
     char arquivo_de_entrada[STR_BUFFER];
     char arquivo_de_saida[STR_BUFFER];
     char senha[STR_BUFFER];
     bool apagar = false;
+
     if(argc < 4) {
         printf("Uso: %s -<modo> -i <arquivo de entrada> [-o <arquivo de saida>] -p <senha> [-a]\n", argv[0]);
         return 1;
@@ -206,8 +279,12 @@ int main(int argc, char** argv) {
     inicializarVetoresFuncPonto();
     
     switch(modo) {
-        case MODO_1: break;
-        case MODO_2: break;
+        case MODO_1: 
+            analise(arquivo_de_entrada, senha, inverte_bit);
+            break;
+        case MODO_2:
+            analise(arquivo_de_entrada, senha, modo2_inverte_bit);
+            break;
         case MODO_C:
             encriptografa(arquivo_de_entrada, arquivo_de_saida, senha);
             if(apagar) {

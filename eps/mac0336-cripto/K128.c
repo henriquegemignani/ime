@@ -265,6 +265,22 @@ void K128_Decrypt(block128 entrada, block128 *saida, block128 chave) {
     }
 }
 
+void K128CBC_Encrypt(block128 entrada[], block128 saida[], block128 chave, int numblock) {
+    block128 bloco_anterior = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
+    int i;
+    for(i = 0; i < numblock; ++i) {
+        block128 ent;
+        copy_block128(entrada[i], &ent);
+
+        ent.esquerda ^= bloco_anterior.esquerda;
+        ent.direita  ^= bloco_anterior.direita;
+
+        K128_Encrypt(ent, &saida[i], chave);
+
+        copy_block128(saida[i], &bloco_anterior);
+    }
+}
+
 void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
     byte kB[16];
     size_t senha_size = strlen(senha);
