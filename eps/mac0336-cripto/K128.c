@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <string.h>
 #include "K128.h"
 
@@ -118,7 +118,7 @@ void operacao_rotacao(block64 a, unsigned int b, block64 *s) {
 /* a, b, saida: 64 bits (8 bytes) */
 void operacao_rotacao_por_lbyte(block64 a, block64 b, block64 *s) {
     /* x << y == x << (y mod 64) */
-    /* Os ultimos 6 bits de um número representam o resto da divisão por 64. */
+    /* Os ultimos 6 bits de um nÃºmero representam o resto da divisÃ£o por 64. */
     operacao_rotacao(a, b & 0x3F, s);
 }
 
@@ -246,7 +246,7 @@ void K128_Encrypt(block128 entrada, block128 *saida, block128 chave) {
         K128_Iteracao(entrada, saida, K_lista + 4*i);
         copy_block128(*saida, &entrada);
     }
-    /* Ultima transformação T */
+    /* Ultima transformaÃ§Ã£o T */
     K128_Iteracao_Parte1(entrada.esquerda, entrada.direita, &(saida->esquerda), &(saida->direita), K_lista[4*R], K_lista[4*R + 1]);
 }
 
@@ -256,7 +256,7 @@ void K128_Decrypt(block128 entrada, block128 *saida, block128 chave) {
     int i;
     GeraSubChaves(chave, K_lista);
     
-    /* A ultima transformação T vem primeiro quando decriptografamos */
+    /* A ultima transformaÃ§Ã£o T vem primeiro quando decriptografamos */
     K128_Iteracao_Parte1_INV(entrada.esquerda, entrada.direita, &(buffer.esquerda), &(buffer.direita), K_lista[4*R], K_lista[4*R + 1]);
 
     for(i = R - 1; i >= 0; --i) {
@@ -285,7 +285,7 @@ void gera_chave_da_senha(char* senha, block128 *k) { /* Chave de 128 bits */
     byte kB[16];
     size_t senha_size = strlen(senha);
     if(senha_size < 16) {
-        /* senha_size é pelo menos 8 pela validação de senha acima. */
+        /* senha_size Ã© pelo menos 8 pela validaÃ§Ã£o de senha acima. */
         memcpy(kB, senha, senha_size);
         memcpy(kB + senha_size, senha, 16 - senha_size);
     } else {

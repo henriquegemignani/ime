@@ -216,6 +216,10 @@ int main(int argc, char** argv) {
         return 2;
     }
     if(modo != MODO_K) {
+        if(argc < 6) {
+            printf("Uso: %s -<modo> -i <arquivo de entrada> [-o <arquivo de saida>] -p <senha> [-a]\n", argv[0]);
+            return 1;
+        }
         if(strcmp(argv[2], "-i") != 0) {
             printf("Parametro inválido: '%s. Esperado: -i'\n", argv[2]);
             return 3;

@@ -1,4 +1,4 @@
-#ifndef K128_H_
+﻿#ifndef K128_H_
 #define K128_H_
 
 #include "types.h"

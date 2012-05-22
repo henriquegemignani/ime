@@ -1,4 +1,4 @@
-#ifndef TYPES_H_
+﻿#ifndef TYPES_H_
 #define TYPES_H_
 
 #include <stdint.h>
