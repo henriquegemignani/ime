@@ -13,13 +13,17 @@
 #define MODO_2 2
 #define MODO_C 3
 #define MODO_D 4
+#define MODO_K 5
 int trata_modo(char* input) {
     if(*(input++) != '-') return -1;
     switch(*input) {
         case '1': return MODO_1;
         case '2': return MODO_2;
         case 'c': return MODO_C;
-        case 'd': return MODO_D;
+        case 'd': 
+            if(strcmp(input, "debug") == 0)
+                return MODO_K;
+            return MODO_D;
         default: return -1;
     }
 }
@@ -127,28 +131,34 @@ int main(int argc, char** argv) {
     char arquivo_de_saida[STR_BUFFER];
     char senha[STR_BUFFER];
     bool apagar = false;
-    if(argc < 6) {
+    if(argc < 4) {
         printf("Uso: %s -<modo> -i <arquivo de entrada> [-o <arquivo de saida>] -p <senha> [-a]\n", argv[0]);
         return 1;
     }
     modo = trata_modo(argv[1]);
     if(modo == -1) {
-        printf("Parametro inválido: '%s'. Esperado: modo (-1, -2, -c, -d)\n", argv[1]);
+        printf("Parametro inválido: '%s'. Esperado: modo (-1, -2, -c, -d, -debug)\n", argv[1]);
         return 2;
     }
-    if(strcmp(argv[2], "-i") != 0) {
-        printf("Parametro inválido: '%s. Esperado: -i'\n", argv[2]);
-        return 3;
-    }
-    strncpy(arquivo_de_entrada, argv[3], STR_BUFFER - 1);
-    arquivo_de_entrada[STR_BUFFER - 1] = '\0';
-    {
-        FILE* f = fopen(arquivo_de_entrada, "r");
-        if(f == NULL) {
-            printf("Impossível abrir arquivo '%s' para leitura.\n", arquivo_de_entrada);
-            return 5;
+    if(modo != MODO_K) {
+        if(strcmp(argv[2], "-i") != 0) {
+            printf("Parametro inválido: '%s. Esperado: -i'\n", argv[2]);
+            return 3;
         }
-        fclose(f);
+        strncpy(arquivo_de_entrada, argv[3], STR_BUFFER - 1);
+        arquivo_de_entrada[STR_BUFFER - 1] = '\0';
+        {
+            FILE* f = fopen(arquivo_de_entrada, "r");
+            if(f == NULL) {
+                printf("Impossível abrir arquivo '%s' para leitura.\n", arquivo_de_entrada);
+                return 5;
+            }
+            fclose(f);
+        }
+    } else {
+        /* -debug atrapalha tudo... Isso é feio mas funciona. */
+        argv -= 2;
+        argc += 2;
     }
     
     if(modo == MODO_C || modo == MODO_D) {
@@ -168,8 +178,7 @@ int main(int argc, char** argv) {
             fclose(f);
         }
         
-        argv++;
-        argv++;
+        argv += 2;
         argc -= 2;
         
         if(argc < 6) {
@@ -191,12 +200,6 @@ int main(int argc, char** argv) {
     
     apagar = (argc == 7);
     
-    printf("Modo: %d\n", modo);
-    printf("Entrada: %s\n", arquivo_de_entrada);
-    printf("Saida: %s\n", arquivo_de_saida);
-    printf("Senha: %s\n", senha);
-    printf("Apagar: %d\n", apagar);
-    
     /* Necessidade. */
     inicializarVetoresFuncPonto();
     
@@ -213,8 +216,17 @@ int main(int argc, char** argv) {
         case MODO_D:
             decriptografa(arquivo_de_entrada, arquivo_de_saida, senha);
             break;
+        case MODO_K:
+            {
+                int i;
+                block128 k;
+                block64 lK[50];
+                gera_chave_da_senha(senha, &k);
+                GeraSubChaves(k, lK);
+                for(i = 0; i < 50; i++)
+                    printf("k[%d] = %016llx\n", i+1, lK[i]);
+            }
         default: break;
     }
-    fgetc(stdin);
     return 0;
 }

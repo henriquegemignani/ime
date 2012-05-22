@@ -154,7 +154,7 @@ void K128_Iteracao_Parte2(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, bl
     
     /* Calculando XeL = Xe (+) Z; XfL = Xf [+] Z */
     operacao_xor(Xe, Z, XeL);
-    operacao_soma64(Xf, Z, XfL);
+    operacao_xor(Xf, Z, XfL);
 }
 
 /* entrada, saida e chave: 128 bits (16 bytes) */
@@ -165,23 +165,7 @@ void K128_Iteracao(block128 entrada, block128 *saida, block64 chaves[]) {
 }
 
 void K128_Iteracao_Parte2_INV(block64 Xe, block64 Xf, block64 *XeL, block64 *XfL, block64 kE, block64 kF) {
-    block64 Y1, Y2, Z;
-    block64 aux1, aux2;
-    
-    operacao_xor(Xe, Xf, &Y1);
-    
-    /* Calculando Y2 = [(kE (*) Y1) [+] Y1] (*) kF */
-    operacao_ponto(kE, Y1, &aux1);  /* aux1 = (kE (*) Y1) */
-    operacao_soma64(aux1, Y1, &aux2); /* aux2 = aux1 [+] Z1 = (kE (*) Y1) [+] Z1 */
-    operacao_ponto(aux2, kF, &Y2);
-    
-    /* Calculando Z = (kE (*) Y1) [+] Y2 */
-    operacao_ponto(kE, Y1, &aux1);
-    operacao_soma64(aux1, Y2, &Z);
-    
-    /* Calculando XeL = Xe (+) Y2; XfL = Xf [+] Z2 */
-    operacao_xor(Xe, Z, XeL);
-    operacao_soma64(Xf, Z, XfL);
+    K128_Iteracao_Parte2(Xe, Xf, XeL, XfL, kE, kF);
 }
 
 void K128_Iteracao_Parte1_INV(block64 Xa, block64 Xb, block64 *XaL, block64 *XbL, block64 kA, block64 kB) {
