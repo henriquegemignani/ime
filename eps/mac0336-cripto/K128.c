@@ -218,7 +218,7 @@ void GeraSubChaves(block128 K, block64 k_out[]) {
     
         /* Passo 6. */
         int s;
-        for(s = 0; s < NUM_KEYS(R); ++s) {
+        for(s = 0; s <= NUM_KEYS(R); ++s) {
             block64 aux1, aux2;
         
             operacao_soma64(k[i], A, &aux1);
